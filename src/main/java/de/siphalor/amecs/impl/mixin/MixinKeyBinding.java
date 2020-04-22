@@ -8,6 +8,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -63,13 +65,17 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 		KeyBindingManager.register((KeyBinding)(Object) this);
 	}
 
-	@Inject(method = "getLocalizedName()Ljava/lang/String;", at = @At("TAIL"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
-	public void getLocalizedName(CallbackInfoReturnable<String> callbackInfoReturnable, String i18nName, String glfwName) {
+	@Inject(method = "getLocalizedName()Lnet/minecraft/text/Text;", at = @At("TAIL"), cancellable = true)
+	public void getLocalizedName(CallbackInfoReturnable<Text> callbackInfoReturnable) {
 		 StringBuilder extra = new StringBuilder();
+
 		 if(amecs$keyModifiers.getShift()) extra.append("Shift + ");
 		 if(amecs$keyModifiers.getControl()) extra.append("Control + ");
 		 if(amecs$keyModifiers.getAlt()) extra.append("Alt + ");
-		callbackInfoReturnable.setReturnValue(extra.toString() + (glfwName == null ? I18n.translate(i18nName) : glfwName));
+
+		 Text text = new LiteralText(extra.toString()).append(keyCode.method_27445());
+
+		 callbackInfoReturnable.setReturnValue(text);
 	}
 
 	@Inject(method = "matchesKey", at = @At("RETURN"), cancellable = true)
