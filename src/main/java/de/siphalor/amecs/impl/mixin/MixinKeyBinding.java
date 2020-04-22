@@ -6,7 +6,6 @@ import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.options.KeyBinding;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -17,7 +16,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.Map;
 
@@ -29,13 +27,9 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 
 	@Shadow private int timesPressed;
 
-	@Shadow private boolean pressed;
-
 	@Shadow @Final private static Map<InputUtil.KeyCode, KeyBinding> keysByCode;
 
 	@Shadow @Final private static Map<String, KeyBinding> keysById;
-
-	@Shadow protected abstract void reset();
 
 	private KeyModifiers amecs$keyModifiers = new KeyModifiers();
 
