@@ -4,7 +4,7 @@ import de.siphalor.amecs.api.KeyModifiers;
 import net.minecraft.client.util.InputUtil;
 
 public interface IKeyBinding {
-	InputUtil.KeyCode amecs$getKeyCode();
+	InputUtil.Key amecs$getKeyCode();
 
 	int amecs$getTimesPressed();
 	void amecs$setTimesPressed(int timesPressed);

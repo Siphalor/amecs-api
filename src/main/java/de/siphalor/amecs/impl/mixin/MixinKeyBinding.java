@@ -23,19 +23,19 @@ import java.util.Map;
 @Environment(EnvType.CLIENT)
 @Mixin(KeyBinding.class)
 public abstract class MixinKeyBinding implements IKeyBinding {
-	@Shadow private InputUtil.KeyCode keyCode;
+	@Shadow private InputUtil.Key boundKey;
 
 	@Shadow private int timesPressed;
 
-	@Shadow @Final private static Map<InputUtil.KeyCode, KeyBinding> keysByCode;
+	@Shadow @Final private static Map<InputUtil.Key, KeyBinding> keyToBindings;
 
 	@Shadow @Final private static Map<String, KeyBinding> keysById;
 
 	private KeyModifiers amecs$keyModifiers = new KeyModifiers();
 
 	@Override
-	public InputUtil.KeyCode amecs$getKeyCode() {
-		return keyCode;
+	public InputUtil.Key amecs$getKeyCode() {
+		return boundKey;
 	}
 
 	@Override
@@ -55,11 +55,11 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 
 	@Inject(method = "<init>(Ljava/lang/String;Lnet/minecraft/client/util/InputUtil$Type;ILjava/lang/String;)V", at = @At("RETURN"))
 	private void onConstructed(String id, InputUtil.Type type, int defaultCode, String category, CallbackInfo callbackInfo) {
-		keysByCode.remove(keyCode);
+		keyToBindings.remove(boundKey);
 		KeyBindingManager.register((KeyBinding)(Object) this);
 	}
 
-	@Inject(method = "getLocalizedName()Lnet/minecraft/text/Text;", at = @At("TAIL"), cancellable = true)
+	@Inject(method = "getBoundKeyLocalizedText", at = @At("TAIL"), cancellable = true)
 	public void getLocalizedName(CallbackInfoReturnable<Text> callbackInfoReturnable) {
 		 StringBuilder extra = new StringBuilder();
 
@@ -67,7 +67,7 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 		 if(amecs$keyModifiers.getControl()) extra.append("Control + ");
 		 if(amecs$keyModifiers.getAlt()) extra.append("Alt + ");
 
-		 Text text = new LiteralText(extra.toString()).append(keyCode.method_27445());
+		 Text text = new LiteralText(extra.toString()).append(boundKey.getLocalizedText());
 
 		 callbackInfoReturnable.setReturnValue(text);
 	}
@@ -88,13 +88,13 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 	}
 
 	@Inject(method = "onKeyPressed", at = @At("HEAD"), cancellable = true)
-	private static void onKeyPressed(InputUtil.KeyCode keyCode, CallbackInfo callbackInfo) {
+	private static void onKeyPressed(InputUtil.Key keyCode, CallbackInfo callbackInfo) {
 		KeyBindingManager.onKeyPressed(keyCode);
 		callbackInfo.cancel();
 	}
 
 	@Inject(method = "setKeyPressed", at = @At("HEAD"))
-	private static void setKeyPressed(InputUtil.KeyCode keyCode, boolean pressed, CallbackInfo callbackInfo) {
+	private static void setKeyPressed(InputUtil.Key keyCode, boolean pressed, CallbackInfo callbackInfo) {
 		KeyBindingManager.setKeyPressed(keyCode, pressed);
 	}
 

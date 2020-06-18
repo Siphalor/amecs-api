@@ -33,7 +33,7 @@ public class MixinKeyBindingEntry implements IKeyBindingEntry {
 	@Inject(method = "method_19871(Lnet/minecraft/client/options/KeyBinding;Lnet/minecraft/client/gui/widget/ButtonWidget;)V", at = @At("RETURN"))
 	public void onEditButtonClicked(KeyBinding keyBinding, ButtonWidget buttonWidget, CallbackInfo callbackInfo) {
 		((IKeyBinding) binding).amecs$getKeyModifiers().unset();
-        binding.setKeyCode(InputUtil.UNKNOWN_KEYCODE);
+        binding.setBoundKey(InputUtil.UNKNOWN_KEY);
 	}
 
 	@Override

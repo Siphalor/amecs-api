@@ -172,7 +172,7 @@ public class KeyModifiers {
 	 * @param keyBinding the key binding from where to extract the key code
 	 */
 	public void cleanup(KeyBinding keyBinding) {
-		int keyCode = ((IKeyBinding) keyBinding).amecs$getKeyCode().getKeyCode();
+		int keyCode = ((IKeyBinding) keyBinding).amecs$getKeyCode().getCode();
 		set(KeyModifier.fromKeyCode(keyCode), false);
 	}
 

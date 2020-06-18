@@ -18,10 +18,10 @@ import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
 public class KeyBindingManager {
-	public static Map<InputUtil.KeyCode, ConcurrentLinkedQueue<KeyBinding>> keysById = new HashMap<>();
+	public static Map<InputUtil.Key, ConcurrentLinkedQueue<KeyBinding>> keysById = new HashMap<>();
 
 	public static void register(KeyBinding keyBinding) {
-		InputUtil.KeyCode keyCode = ((IKeyBinding) keyBinding).amecs$getKeyCode();
+		InputUtil.Key keyCode = ((IKeyBinding) keyBinding).amecs$getKeyCode();
         if(keysById.containsKey(keyCode)) {
         	keysById.get(keyCode).add(keyBinding);
 		} else {
@@ -29,7 +29,7 @@ public class KeyBindingManager {
 		}
 	}
 
-	public static Stream<KeyBinding> getMatchingKeyBindings(InputUtil.KeyCode keyCode) {
+	public static Stream<KeyBinding> getMatchingKeyBindings(InputUtil.Key keyCode) {
 		Queue<KeyBinding> keyBindingQueue = keysById.get(keyCode);
 		if(keyBindingQueue == null) return Stream.empty();
 		Stream<KeyBinding> result = keyBindingQueue.stream().filter(keyBinding -> ((IKeyBinding) keyBinding).amecs$getKeyModifiers().match());
@@ -40,7 +40,7 @@ public class KeyBindingManager {
 	}
 
 	@SuppressWarnings("deprecation")
-	public static void onKeyPressed(InputUtil.KeyCode keyCode) {
+	public static void onKeyPressed(InputUtil.Key keyCode) {
 		getMatchingKeyBindings(keyCode).filter(keyBinding -> !(keyBinding instanceof PriorityKeyBinding)).forEach(keyBinding -> {
 			if(keyBinding instanceof ListeningKeyBinding)
 				((ListeningKeyBinding) keyBinding).onPressed();
@@ -52,7 +52,7 @@ public class KeyBindingManager {
 	public static void updatePressedStates() {
 		Collection<KeyBinding> keyBindings = KeyBindingManager.keysById.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
 		for(KeyBinding keyBinding : keyBindings) {
-			boolean pressed = !keyBinding.isNotBound() && ((IKeyBinding) keyBinding).amecs$getKeyCode().getCategory() == InputUtil.Type.KEYSYM && InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), ((IKeyBinding) keyBinding).amecs$getKeyCode().getKeyCode());
+			boolean pressed = !keyBinding.isUnbound() && ((IKeyBinding) keyBinding).amecs$getKeyCode().getCategory() == InputUtil.Type.KEYSYM && InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), ((IKeyBinding) keyBinding).amecs$getKeyCode().getCode());
 			keyBinding.setPressed(pressed);
 		}
 	}
@@ -66,7 +66,7 @@ public class KeyBindingManager {
 		KeyBindingUtils.getIdToKeyBindingMap().values().forEach(keyBinding -> keyBinding.setPressed(false));
 	}
 
-	public static boolean onKeyPressedPriority(InputUtil.KeyCode keyCode) {
+	public static boolean onKeyPressedPriority(InputUtil.Key keyCode) {
 		Set<KeyBinding> keyBindings = getMatchingKeyBindings(keyCode).filter(keyBinding -> keyBinding instanceof PriorityKeyBinding).collect(Collectors.toSet());
 		for(KeyBinding keyBinding : keyBindings) {
 			if(((PriorityKeyBinding) keyBinding).onPressedPriority()) {
@@ -76,8 +76,8 @@ public class KeyBindingManager {
 		return false;
 	}
 
-	public static void setKeyPressed(InputUtil.KeyCode keyCode, boolean pressed) {
-		AmecsAPI.CURRENT_MODIFIERS.set(KeyModifier.fromKeyCode(keyCode.getKeyCode()), pressed);
+	public static void setKeyPressed(InputUtil.Key keyCode, boolean pressed) {
+		AmecsAPI.CURRENT_MODIFIERS.set(KeyModifier.fromKeyCode(keyCode.getCode()), pressed);
 
 		getMatchingKeyBindings(keyCode).forEach(keyBinding -> keyBinding.setPressed(pressed));
 	}

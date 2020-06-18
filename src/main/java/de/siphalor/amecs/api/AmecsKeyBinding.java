@@ -4,6 +4,7 @@ import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
+import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Identifier;
 
@@ -11,7 +12,7 @@ import net.minecraft.util.Identifier;
  * A {@link net.minecraft.client.options.KeyBinding} base class to be used when you want to define modifiers keys as default
  */
 @Environment(EnvType.CLIENT)
-public class AmecsKeyBinding extends FabricKeyBinding {
+public class AmecsKeyBinding extends KeyBinding {
 	private final KeyModifiers defaultModifiers;
 
 	/**
@@ -23,7 +24,7 @@ public class AmecsKeyBinding extends FabricKeyBinding {
 	 * @param defaultModifiers the default modifiers
 	 */
 	public AmecsKeyBinding(Identifier id, InputUtil.Type type, int code, String category, KeyModifiers defaultModifiers) {
-		super(id, type, code, category);
+		super("key." + id.getNamespace() + "." + id.getPath(), type, code, category);
 		this.defaultModifiers = defaultModifiers;
 		((IKeyBinding) this).amecs$getKeyModifiers().setValue(defaultModifiers.getValue());
 	}

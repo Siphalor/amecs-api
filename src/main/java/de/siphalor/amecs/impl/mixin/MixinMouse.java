@@ -34,13 +34,13 @@ public class MixinMouse {
 
 	@Inject(method = "onMouseScroll", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/client/gui/screen/Screen;", ordinal = 0), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
 	private void onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, double deltaY) {
-		InputUtil.KeyCode keyCode = InputUtil.Type.MOUSE.createFromCode(deltaY > 0 ? KeyBindingUtils.MOUSE_SCROLL_UP : KeyBindingUtils.MOUSE_SCROLL_DOWN);
+		InputUtil.Key keyCode = InputUtil.Type.MOUSE.createFromCode(deltaY > 0 ? KeyBindingUtils.MOUSE_SCROLL_UP : KeyBindingUtils.MOUSE_SCROLL_DOWN);
 		if(client.currentScreen instanceof ControlsOptionsScreen) {
 			KeyBinding focusedBinding = ((ControlsOptionsScreen) client.currentScreen).focusedBinding;
 			if(focusedBinding != null) {
-				if(((IKeyBinding) focusedBinding).amecs$getKeyCode() != InputUtil.UNKNOWN_KEYCODE) {
+				if(((IKeyBinding) focusedBinding).amecs$getKeyCode() != InputUtil.UNKNOWN_KEY) {
 					KeyModifiers keyModifiers = ((IKeyBinding) focusedBinding).amecs$getKeyModifiers();
-					keyModifiers.set(KeyModifier.fromKeyCode(((IKeyBinding) focusedBinding).amecs$getKeyCode().getKeyCode()), true);
+					keyModifiers.set(KeyModifier.fromKeyCode(((IKeyBinding) focusedBinding).amecs$getKeyCode().getCode()), true);
 				}
 				client.options.setKeyCode(focusedBinding, keyCode);
 				KeyBinding.updateKeysByCode();

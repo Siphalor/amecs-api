@@ -35,7 +35,7 @@ public class MixinGameOptions {
 	)
 	public void onKeyBindingWritten(CallbackInfo callbackInfo, PrintWriter printWriter, KeyBinding[] keyBindings, int keyBindingsCount, int index, KeyBinding keyBinding) {
 		//noinspection deprecation
-		printWriter.println(AmecsAPI.KEY_MODIFIER_GAME_OPTION + keyBinding.getId() + ":" + ((IKeyBinding) keyBinding).amecs$getKeyModifiers().serializeValue());
+		printWriter.println(AmecsAPI.KEY_MODIFIER_GAME_OPTION + keyBinding.getTranslationKey() + ":" + ((IKeyBinding) keyBinding).amecs$getKeyModifiers().serializeValue());
 	}
 
 	@Inject(
