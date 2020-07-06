@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.4.12'
+	id 'fabric-loom' version '0.4-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -19,7 +19,7 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.minecraft_version}+build.${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	modImplementation "net.fabricmc.fabric-api:fabric-api:+"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 }
 
 processResources {
