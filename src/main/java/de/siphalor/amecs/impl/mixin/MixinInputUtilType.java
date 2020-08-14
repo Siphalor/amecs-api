@@ -20,7 +20,7 @@ public abstract class MixinInputUtilType {
 	@SuppressWarnings("UnresolvedMixinReference")
 	@Inject(method = "<clinit>", at = @At("RETURN"))
 	private static void onRegisterKeyCodes(CallbackInfo callbackInfo) {
-		mapKey(InputUtil.Type.MOUSE, "amecs.key.mouse.scroll.up", KeyBindingUtils.MOUSE_SCROLL_UP);
-		mapKey(InputUtil.Type.MOUSE, "amecs.key.mouse.scroll.down", KeyBindingUtils.MOUSE_SCROLL_DOWN);
+		mapKey(InputUtil.Type.MOUSE, "amecsapi.key.mouse.scroll.up", KeyBindingUtils.MOUSE_SCROLL_UP);
+		mapKey(InputUtil.Type.MOUSE, "amecsapi.key.mouse.scroll.down", KeyBindingUtils.MOUSE_SCROLL_DOWN);
 	}
 }
