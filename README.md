@@ -10,14 +10,14 @@ This library mod provides modifier keys for Minecraft keybindings as well as som
  ```groovy
 repositories {
     maven {
-        url "https://jitpack.io/"
-        name "JitPack"
+        url "https://maven.siphalor.de/"
+        name "Siphalor's Maven"
     }
 }
 
 dependencies {
-    modImplementation "com.github.siphalor:amecs-api:-SNAPSHOT"
-    include "com.github.siphalor:amecs-api:-SNAPSHOT"
+    modImplementation "de.siphalor:amecsapi-1.15:1+"
+    include "de.siphalor:amecsapi-1.15:1+"
 }
 ```
 
