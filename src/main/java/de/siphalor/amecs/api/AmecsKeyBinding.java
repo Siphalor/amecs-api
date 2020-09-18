@@ -23,7 +23,7 @@ public class AmecsKeyBinding extends KeyBinding {
 	 * @param defaultModifiers the default modifiers
 	 */
 	public AmecsKeyBinding(Identifier id, InputUtil.Type type, int code, String category, KeyModifiers defaultModifiers) {
-		super(id.toString(), type, code, category);
+		super("key." + id.getNamespace() + "." + id.getPath(), type, code, category);
 		this.defaultModifiers = defaultModifiers;
 		((IKeyBinding) this).amecs$getKeyModifiers().setValue(defaultModifiers.getValue());
 	}
