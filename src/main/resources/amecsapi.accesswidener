@@ -1,0 +1,2 @@
+accessWidener	v1	named
+accessible	method	net/minecraft/client/util/InputUtil$Type	mapKey	(Lnet/minecraft/client/util/InputUtil$Type;Ljava/lang/String;I)V

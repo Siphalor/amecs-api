@@ -11,6 +11,7 @@ version = "${project.mod_version}+mc${project.minecraft_version}"
 group = project.maven_group
 
 minecraft {
+	accessWidener "src/main/resources/amecsapi.accesswidener"
 }
 
 dependencies {
@@ -18,8 +19,6 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.minecraft_version}+build.${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-	modImplementation "net.fabricmc.fabric-api:fabric-api:+"
 }
 
 processResources {
