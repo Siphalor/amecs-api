@@ -17,6 +17,7 @@
 		"client": [],
 		"server": []
 	},
+	"accessWidener": "amecsapi.accesswidener",
 	"mixins": [
 		"amecsapi.mixins.json"
 	],
