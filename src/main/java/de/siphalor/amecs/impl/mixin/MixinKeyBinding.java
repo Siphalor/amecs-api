@@ -122,4 +122,9 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 	private static Map<String, KeyBinding> amecs$getIdToKeyBindingMap() {
 		return keysById;
 	}
+
+	@Override
+	public void amecs$setPressed(boolean pressed) {
+		this.pressed = pressed;
+	}
 }

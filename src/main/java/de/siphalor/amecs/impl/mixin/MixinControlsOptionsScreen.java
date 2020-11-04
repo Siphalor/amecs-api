@@ -5,12 +5,12 @@ import de.siphalor.amecs.api.KeyModifiers;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.options.ControlsOptionsScreen;
-import net.minecraft.client.gui.screen.options.GameOptionsScreen;
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,13 +19,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @SuppressWarnings("WeakerAccess")
 @Mixin(ControlsOptionsScreen.class)
-public abstract class MixinControlsOptionsScreen extends GameOptionsScreen {
+public abstract class MixinControlsOptionsScreen extends Screen {
 	@Shadow public KeyBinding focusedBinding;
 
 	@Shadow public long time;
 
-	public MixinControlsOptionsScreen(Screen screen, GameOptions gameOptions, Text text) {
-		super(screen, gameOptions, text);
+	@Shadow @Final private GameOptions options;
+
+	protected MixinControlsOptionsScreen(Text title) {
+		super(title);
 	}
 
 	@Inject(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/options/GameOptions;setKeyCode(Lnet/minecraft/client/options/KeyBinding;Lnet/minecraft/client/util/InputUtil$KeyCode;)V"))
@@ -47,7 +49,7 @@ public abstract class MixinControlsOptionsScreen extends GameOptionsScreen {
 	public void onKeyPressed(int keyCode, int scanCode, int int_3, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
 		callbackInfoReturnable.setReturnValue(true);
 		if(focusedBinding.isNotBound()) {
-			gameOptions.setKeyCode(focusedBinding, InputUtil.getKeyCode(keyCode, scanCode));
+			options.setKeyCode(focusedBinding, InputUtil.getKeyCode(keyCode, scanCode));
 		} else {
 			int mainKeyCode = ((IKeyBinding) focusedBinding).amecs$getKeyCode().getKeyCode();
 			KeyModifiers keyModifiers = ((IKeyBinding) focusedBinding).amecs$getKeyModifiers();
@@ -55,7 +57,7 @@ public abstract class MixinControlsOptionsScreen extends GameOptionsScreen {
 			KeyModifier keyModifier = KeyModifier.fromKeyCode(keyCode);
 			if (mainKeyModifier != KeyModifier.NONE && keyModifier == KeyModifier.NONE) {
 				keyModifiers.set(mainKeyModifier, true);
-				gameOptions.setKeyCode(focusedBinding, InputUtil.getKeyCode(keyCode, scanCode));
+				options.setKeyCode(focusedBinding, InputUtil.getKeyCode(keyCode, scanCode));
 			} else {
 				keyModifiers.set(keyModifier, true);
 				keyModifiers.cleanup(focusedBinding);

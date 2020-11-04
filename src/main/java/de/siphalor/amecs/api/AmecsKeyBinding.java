@@ -28,9 +28,8 @@ public class AmecsKeyBinding extends KeyBinding {
 		((IKeyBinding) this).amecs$getKeyModifiers().setValue(defaultModifiers.getValue());
 	}
 
-	@Override
 	public void setPressed(boolean pressed) {
-		super.setPressed(pressed);
+		((IKeyBinding) this).amecs$setPressed(pressed);
 		if(pressed)
 			onPressed();
 		else

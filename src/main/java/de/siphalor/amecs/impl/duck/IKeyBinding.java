@@ -10,4 +10,6 @@ public interface IKeyBinding {
 	void amecs$setTimesPressed(int timesPressed);
 
 	KeyModifiers amecs$getKeyModifiers();
+
+	void amecs$setPressed(boolean pressed);
 }

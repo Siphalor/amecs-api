@@ -18,6 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.io.PrintWriter;
 import java.util.Iterator;
+import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
 @Environment(EnvType.CLIENT)
@@ -43,7 +44,7 @@ public class MixinGameOptions {
 		at = @At(value = "FIELD", target = "Lnet/minecraft/client/options/GameOptions;keysAll:[Lnet/minecraft/client/options/KeyBinding;", shift = At.Shift.BEFORE),
 		locals = LocalCapture.CAPTURE_FAILSOFT
 	)
-	public void onLoad(CallbackInfo callbackInfo, CompoundTag ct1, CompoundTag ct2, Iterator<?> iterator, String key, String value) {
+	public void onLoad(CallbackInfo callbackInfo, List<?> list, CompoundTag ct2, Iterator<?> iterator, String key, String value) {
         if(key.startsWith(AmecsAPI.KEY_MODIFIER_GAME_OPTION)) {
 			key = key.substring(AmecsAPI.KEY_MODIFIER_GAME_OPTION.length());
 			KeyBinding keyBinding = KeyBindingUtils.getIdToKeyBindingMap().get(key);
