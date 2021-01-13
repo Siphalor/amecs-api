@@ -53,7 +53,7 @@ public class KeyBindingUtils {
 			try {
 				//noinspection JavaReflectionMemberAccess
 				Method method = KeyBinding.class.getDeclaredMethod("amecs$getIdToKeyBindingMap");
-				if(!method.isAccessible()) method.setAccessible(true);
+				method.setAccessible(true);
 				//noinspection unchecked
 				idToKeyBindingMap = (Map<String, KeyBinding>) method.invoke(null);
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
