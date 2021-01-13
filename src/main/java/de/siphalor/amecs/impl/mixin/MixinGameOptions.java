@@ -34,9 +34,13 @@ public class MixinGameOptions {
 	@Inject(method = "write", at = @At("RETURN"))
 	public void write(CallbackInfo callbackInfo) {
 		try (PrintWriter writer = new PrintWriter(new FileOutputStream(amecsOptionsFile))) {
+			KeyModifiers modifiers;
 			for (KeyBinding binding : keysAll) {
-				//noinspection deprecation
-				writer.println(KEY_MODIFIERS_PREFIX + binding.getId() + ":" + ((IKeyBinding) binding).amecs$getKeyModifiers().serializeValue());
+				modifiers = ((IKeyBinding) binding).amecs$getKeyModifiers();
+				if (!modifiers.isUnset()) {
+					//noinspection deprecation
+					writer.println(KEY_MODIFIERS_PREFIX + binding.getId() + ":" + modifiers.serializeValue());
+				}
 			}
 		} catch (FileNotFoundException e) {
 			AmecsAPI.log(Level.ERROR, "Failed to save Amecs API modifiers to options file:");
