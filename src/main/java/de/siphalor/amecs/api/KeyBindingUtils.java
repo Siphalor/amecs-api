@@ -17,7 +17,6 @@ public class KeyBindingUtils {
 	public static final int MOUSE_SCROLL_DOWN = 513;
 
 	private static float lastScrollAmount = 0.0F;
-	private static boolean eventPropagationCanceled = false;
 	private static Map<String, KeyBinding> idToKeyBindingMap;
 
 	/**
@@ -36,14 +35,6 @@ public class KeyBindingUtils {
 		KeyBindingUtils.lastScrollAmount = lastScrollAmount;
 	}
 
-	public static boolean isEventPropagationCanceled() {
-		return eventPropagationCanceled;
-	}
-
-	public static void setEventPropagationCanceled(boolean eventPropagationCanceled) {
-		KeyBindingUtils.eventPropagationCanceled = eventPropagationCanceled;
-	}
-
 	/**
 	 * Gets the "official" idToKeys map
 	 * @return the map (use with care)
@@ -53,7 +44,7 @@ public class KeyBindingUtils {
 			try {
 				//noinspection JavaReflectionMemberAccess
 				Method method = KeyBinding.class.getDeclaredMethod("amecs$getIdToKeyBindingMap");
-				if(!method.isAccessible()) method.setAccessible(true);
+				method.setAccessible(true);
 				//noinspection unchecked
 				idToKeyBindingMap = (Map<String, KeyBinding>) method.invoke(null);
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {

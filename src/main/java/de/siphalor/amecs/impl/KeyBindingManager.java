@@ -2,7 +2,6 @@ package de.siphalor.amecs.impl;
 
 import de.siphalor.amecs.api.KeyBindingUtils;
 import de.siphalor.amecs.api.KeyModifier;
-import de.siphalor.amecs.api.ListeningKeyBinding;
 import de.siphalor.amecs.api.PriorityKeyBinding;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
@@ -32,20 +31,16 @@ public class KeyBindingManager {
 	public static Stream<KeyBinding> getMatchingKeyBindings(InputUtil.Key keyCode) {
 		Queue<KeyBinding> keyBindingQueue = keysById.get(keyCode);
 		if(keyBindingQueue == null) return Stream.empty();
-		Stream<KeyBinding> result = keyBindingQueue.stream().filter(keyBinding -> ((IKeyBinding) keyBinding).amecs$getKeyModifiers().match());
+		Stream<KeyBinding> result = keyBindingQueue.stream().filter(keyBinding -> ((IKeyBinding) keyBinding).amecs$getKeyModifiers().isPressed());
 		Set<KeyBinding> keyBindings = result.collect(Collectors.toSet());
 		if(keyBindings.isEmpty())
 			return keysById.get(keyCode).stream().filter(keyBinding -> ((IKeyBinding) keyBinding).amecs$getKeyModifiers().isUnset());
 		return keyBindings.stream();
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void onKeyPressed(InputUtil.Key keyCode) {
 		getMatchingKeyBindings(keyCode).filter(keyBinding -> !(keyBinding instanceof PriorityKeyBinding)).forEach(keyBinding -> {
-			if(keyBinding instanceof ListeningKeyBinding)
-				((ListeningKeyBinding) keyBinding).onPressed();
-			else
-				((IKeyBinding) keyBinding).amecs$setTimesPressed(((IKeyBinding) keyBinding).amecs$getTimesPressed() + 1);
+			((IKeyBinding) keyBinding).amecs$setTimesPressed(((IKeyBinding) keyBinding).amecs$getTimesPressed() + 1);
 		});
 	}
 
