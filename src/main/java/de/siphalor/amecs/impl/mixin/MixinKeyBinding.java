@@ -1,5 +1,6 @@
 package de.siphalor.amecs.impl.mixin;
 
+import de.siphalor.amecs.api.AmecsKeyBinding;
 import de.siphalor.amecs.api.KeyModifiers;
 import de.siphalor.amecs.impl.KeyBindingManager;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
@@ -112,6 +113,16 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 	private static void unpressAll(CallbackInfo callbackInfo) {
 		KeyBindingManager.unpressAll();
 		callbackInfo.cancel();
+	}
+
+	@Inject(method = "isDefault", at = @At("HEAD"), cancellable = true)
+	public void isDefault(CallbackInfoReturnable<Boolean> cir) {
+		//noinspection ConstantConditions
+		if (!((Object) this instanceof AmecsKeyBinding)) {
+			if (!amecs$keyModifiers.isUnset()) {
+				cir.setReturnValue(false);
+			}
+		}
 	}
 
 	@SuppressWarnings("unused")
