@@ -18,9 +18,6 @@ import java.util.stream.Collectors;
 public class KeyModifiers {
 	private BitSet value;
 
-	@Deprecated
-	public static final KeyModifiers NONE = new KeyModifiers();
-
 	/**
 	 * Constructs new object with no modifiers set
 	 */
@@ -57,16 +54,6 @@ public class KeyModifiers {
 	 */
 	public boolean isPressed() {
 		return equals(AmecsAPI.CURRENT_MODIFIERS);
-	}
-
-	/**
-	 * Compares this object with the currently pressed keys
-	 * @return whether the modifiers match in the current context
-	 * @deprecated Use {@link KeyModifiers#isPressed()} instead
-	 */
-	@Deprecated
-	public boolean match() {
-		return isPressed();
 	}
 
 	/**

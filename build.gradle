@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.4-SNAPSHOT'
+	id 'fabric-loom' version '0.5-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -14,11 +14,21 @@ minecraft {
 	accessWidener "src/main/resources/amecsapi.accesswidener"
 }
 
+repositories {
+	maven {
+		name "Siphalor's Maven"
+		url "https://maven.siphalor.de"
+	}
+	mavenLocal()
+}
+
 dependencies {
 	//to change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.minecraft_version}+build.${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	modCompile "de.siphalor:nmuk-1.15:0.0.0+"
 }
 
 processResources {
