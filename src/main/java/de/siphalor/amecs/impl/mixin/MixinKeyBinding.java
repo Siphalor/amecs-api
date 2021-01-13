@@ -27,13 +27,9 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 
 	@Shadow private int timesPressed;
 
-	@Shadow private boolean pressed;
-
 	@Shadow @Final private static Map<InputUtil.KeyCode, KeyBinding> keysByCode;
 
 	@Shadow @Final private static Map<String, KeyBinding> keysById;
-
-	@Shadow protected abstract void reset();
 
 	private KeyModifiers amecs$keyModifiers = new KeyModifiers();
 
