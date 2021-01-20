@@ -1,4 +1,13 @@
 {
 	"amecsapi.key.mouse.scroll.up": "Scroll Up",
-	"amecsapi.key.mouse.scroll.down": "Scroll Down"
+	"amecsapi.key.mouse.scroll.down": "Scroll Down",
+	"amecsapi.modifier.alt": "Alt",
+	"amecsapi.modifier.alt.short": "Alt",
+	"amecsapi.modifier.alt.tiny": "A",
+	"amecsapi.modifier.control": "Control",
+	"amecsapi.modifier.control.short": "Ctrl",
+	"amecsapi.modifier.control.tiny": "C",
+	"amecsapi.modifier.shift": "Shift",
+	"amecsapi.modifier.shift.short": "Shft",
+	"amecsapi.modifier.shift.tiny": "S"
 }
