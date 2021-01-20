@@ -2,10 +2,14 @@ package de.siphalor.amecs.impl.mixin;
 
 import de.siphalor.amecs.api.AmecsKeyBinding;
 import de.siphalor.amecs.api.KeyModifiers;
+import de.siphalor.amecs.impl.AmecsAPI;
 import de.siphalor.amecs.impl.KeyBindingManager;
+import de.siphalor.amecs.impl.ModifierPrefixTextProvider;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
@@ -64,11 +68,26 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 
 	@Inject(method = "getLocalizedName()Ljava/lang/String;", at = @At("TAIL"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
 	public void getLocalizedName(CallbackInfoReturnable<String> callbackInfoReturnable, String i18nName, String glfwName) {
-		 StringBuilder extra = new StringBuilder();
-		 if(keyModifiers.getShift()) extra.append("Shift + ");
-		 if(keyModifiers.getControl()) extra.append("Control + ");
-		 if(keyModifiers.getAlt()) extra.append("Alt + ");
-		callbackInfoReturnable.setReturnValue(extra.toString() + (glfwName == null ? I18n.translate(i18nName) : glfwName));
+		String name = (glfwName == null ? I18n.translate(i18nName) : glfwName);
+		String fullName;
+		TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+		ModifierPrefixTextProvider.Variation variation = ModifierPrefixTextProvider.Variation.WIDEST;
+		do {
+			StringBuilder builder = new StringBuilder();
+			if (keyModifiers.getControl()) {
+				builder.append(AmecsAPI.CONTROL_PREFIX.getText(variation));
+			}
+			if (keyModifiers.getShift()) {
+				builder.append(AmecsAPI.SHIFT_PREFIX.getText(variation));
+			}
+			if (keyModifiers.getAlt()) {
+				builder.append(AmecsAPI.ALT_PREFIX.getText(variation));
+			}
+			builder.append(name);
+			fullName = builder.toString();
+		} while ((variation = variation.shorter) != null && textRenderer.getStringWidth(fullName) > 70);
+
+		callbackInfoReturnable.setReturnValue(fullName);
 	}
 
 	@Inject(method = "matchesKey", at = @At("RETURN"), cancellable = true)
