@@ -2,13 +2,19 @@ package de.siphalor.amecs.impl.mixin;
 
 import de.siphalor.amecs.api.AmecsKeyBinding;
 import de.siphalor.amecs.api.KeyModifiers;
+import de.siphalor.amecs.impl.AmecsAPI;
 import de.siphalor.amecs.impl.KeyBindingManager;
+import de.siphalor.amecs.impl.ModifierPrefixTextProvider;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -64,15 +70,31 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 
 	@Inject(method = "getBoundKeyLocalizedText", at = @At("TAIL"), cancellable = true)
 	public void getLocalizedName(CallbackInfoReturnable<Text> callbackInfoReturnable) {
-		 StringBuilder extra = new StringBuilder();
+		Text name = boundKey.getLocalizedText();
+		Text fullName;
+		BaseText temp;
+		TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+		ModifierPrefixTextProvider.Variation variation = ModifierPrefixTextProvider.Variation.WIDEST;
+		do {
+			fullName = name;
+			if (keyModifiers.getControl()) {
+				temp = AmecsAPI.CONTROL_PREFIX.getText(variation);
+				temp.append(fullName);
+				fullName = temp;
+			}
+			if (keyModifiers.getShift()) {
+				temp = AmecsAPI.SHIFT_PREFIX.getText(variation);
+				temp.append(fullName);
+				fullName = temp;
+			}
+			if (keyModifiers.getAlt()) {
+				temp = AmecsAPI.ALT_PREFIX.getText(variation);
+				temp.append(fullName);
+				fullName = temp;
+			}
+		} while ((variation = variation.shorter) != null && textRenderer.getWidth(fullName) > 70);
 
-		 if(keyModifiers.getShift()) extra.append("Shift + ");
-		 if(keyModifiers.getControl()) extra.append("Control + ");
-		 if(keyModifiers.getAlt()) extra.append("Alt + ");
-
-		 Text text = new LiteralText(extra.toString()).append(boundKey.getLocalizedText());
-
-		 callbackInfoReturnable.setReturnValue(text);
+		callbackInfoReturnable.setReturnValue(fullName);
 	}
 
 	@Inject(method = "matchesKey", at = @At("RETURN"), cancellable = true)
