@@ -3,12 +3,12 @@ package de.siphalor.amecs.api;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Identifier;
 
 /**
- * A {@link net.minecraft.client.options.KeyBinding} base class to be used when you want to define modifiers keys as default
+ * A {@link net.minecraft.client.option.KeyBinding} base class to be used when you want to define modifiers keys as default
  */
 @Environment(EnvType.CLIENT)
 public class AmecsKeyBinding extends KeyBinding {

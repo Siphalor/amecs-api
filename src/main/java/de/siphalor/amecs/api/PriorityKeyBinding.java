@@ -1,7 +1,7 @@
 package de.siphalor.amecs.api;
 
 /**
- * An interface to be used on {@link net.minecraft.client.options.KeyBinding}s.
+ * An interface to be used on {@link net.minecraft.client.option.KeyBinding}s.
  * <b>This key binding triggers without further conditions before any other checks or conditions.</b>
  */
 public interface PriorityKeyBinding {

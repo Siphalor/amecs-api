@@ -2,8 +2,7 @@ package de.siphalor.amecs.api;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.options.KeyBinding;
-
+import net.minecraft.client.option.KeyBinding;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;

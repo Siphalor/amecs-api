@@ -4,8 +4,7 @@ import de.siphalor.amecs.impl.AmecsAPI;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.options.KeyBinding;
-
+import net.minecraft.client.option.KeyBinding;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.stream.Collectors;

@@ -7,7 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.options.ControlsOptionsScreen;
+import net.minecraft.client.gui.screen.option.ControlsOptionsScreen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Mixin;
