@@ -29,13 +29,19 @@ import java.util.Map;
 @Environment(EnvType.CLIENT)
 @Mixin(KeyBinding.class)
 public abstract class MixinKeyBinding implements IKeyBinding {
-	@Shadow private InputUtil.KeyCode keyCode;
+	@Shadow
+	private InputUtil.KeyCode keyCode;
 
-	@Shadow private int timesPressed;
+	@Shadow
+	private int timesPressed;
 
-	@Shadow @Final private static Map<InputUtil.KeyCode, KeyBinding> keysByCode;
+	@Shadow
+	@Final
+	private static Map<InputUtil.KeyCode, KeyBinding> keysByCode;
 
-	@Shadow @Final private static Map<String, KeyBinding> keysById;
+	@Shadow
+	@Final
+	private static Map<String, KeyBinding> keysById;
 
 	@Shadow private boolean pressed;
 	@Unique
@@ -53,7 +59,7 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 
 	@Override
 	public void amecs$setTimesPressed(int timesPressed) {
-        this.timesPressed = timesPressed;
+		this.timesPressed = timesPressed;
 	}
 
 	@Override
@@ -64,7 +70,7 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 	@Inject(method = "<init>(Ljava/lang/String;Lnet/minecraft/client/util/InputUtil$Type;ILjava/lang/String;)V", at = @At("RETURN"))
 	private void onConstructed(String id, InputUtil.Type type, int defaultCode, String category, CallbackInfo callbackInfo) {
 		keysByCode.remove(keyCode);
-		KeyBindingManager.register((KeyBinding)(Object) this);
+		KeyBindingManager.register((KeyBinding) (Object) this);
 	}
 
 	@Inject(method = "getLocalizedName()Ljava/lang/String;", at = @At("TAIL"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
@@ -93,19 +99,19 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 
 	@Inject(method = "matchesKey", at = @At("RETURN"), cancellable = true)
 	public void matchesKey(int keyCode, int scanCode, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-		if(!keyModifiers.isUnset() && !keyModifiers.isPressed()) callbackInfoReturnable.setReturnValue(false);
-        timesPressed = 0;
+		if (!keyModifiers.isUnset() && !keyModifiers.isPressed()) callbackInfoReturnable.setReturnValue(false);
+		timesPressed = 0;
 	}
 
 	@Inject(method = "matchesMouse", at = @At("RETURN"), cancellable = true)
 	public void matchesMouse(int mouse, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-        if(!keyModifiers.isUnset() && !keyModifiers.isPressed()) callbackInfoReturnable.setReturnValue(false);
-        timesPressed = 0;
+		if (!keyModifiers.isUnset() && !keyModifiers.isPressed()) callbackInfoReturnable.setReturnValue(false);
+		timesPressed = 0;
 	}
 
 	@Inject(method = "equals", at = @At("RETURN"), cancellable = true)
 	public void equals(KeyBinding other, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-        if(!keyModifiers.equals(((IKeyBinding) other).amecs$getKeyModifiers())) callbackInfoReturnable.setReturnValue(false);
+		if (!keyModifiers.equals(((IKeyBinding) other).amecs$getKeyModifiers())) callbackInfoReturnable.setReturnValue(false);
 	}
 
 	@Inject(method = "onKeyPressed", at = @At("HEAD"))
@@ -127,7 +133,7 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 	@Inject(method = "updateKeysByCode", at = @At("HEAD"), cancellable = true)
 	private static void updateKeyBindings(CallbackInfo callbackInfo) {
 		KeyBindingManager.keysById.clear();
-        keysById.values().forEach(KeyBindingManager::register);
+		keysById.values().forEach(KeyBindingManager::register);
 		callbackInfo.cancel();
 	}
 

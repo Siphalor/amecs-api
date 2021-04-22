@@ -21,19 +21,19 @@ public class KeyBindingManager {
 
 	public static void register(KeyBinding keyBinding) {
 		InputUtil.KeyCode keyCode = ((IKeyBinding) keyBinding).amecs$getKeyCode();
-        if(keysById.containsKey(keyCode)) {
-        	keysById.get(keyCode).add(keyBinding);
+		if (keysById.containsKey(keyCode)) {
+			keysById.get(keyCode).add(keyBinding);
 		} else {
-        	keysById.put(keyCode, new ConcurrentLinkedQueue<>(Collections.singleton(keyBinding)));
+			keysById.put(keyCode, new ConcurrentLinkedQueue<>(Collections.singleton(keyBinding)));
 		}
 	}
 
 	public static Stream<KeyBinding> getMatchingKeyBindings(InputUtil.KeyCode keyCode) {
 		Queue<KeyBinding> keyBindingQueue = keysById.get(keyCode);
-		if(keyBindingQueue == null) return Stream.empty();
+		if (keyBindingQueue == null) return Stream.empty();
 		Stream<KeyBinding> result = keyBindingQueue.stream().filter(keyBinding -> ((IKeyBinding) keyBinding).amecs$getKeyModifiers().isPressed());
 		Set<KeyBinding> keyBindings = result.collect(Collectors.toSet());
-		if(keyBindings.isEmpty())
+		if (keyBindings.isEmpty())
 			return keysById.get(keyCode).stream().filter(keyBinding -> ((IKeyBinding) keyBinding).amecs$getKeyModifiers().isUnset());
 		return keyBindings.stream();
 	}
@@ -46,7 +46,7 @@ public class KeyBindingManager {
 
 	public static void updatePressedStates() {
 		Collection<KeyBinding> keyBindings = KeyBindingManager.keysById.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
-		for(KeyBinding keyBinding : keyBindings) {
+		for (KeyBinding keyBinding : keyBindings) {
 			boolean pressed = !keyBinding.isNotBound() && ((IKeyBinding) keyBinding).amecs$getKeyCode().getCategory() == InputUtil.Type.KEYSYM && InputUtil.isKeyPressed(MinecraftClient.getInstance().window.getHandle(), ((IKeyBinding) keyBinding).amecs$getKeyCode().getKeyCode());
 			((IKeyBinding) keyBinding).amecs$setPressed(pressed);
 		}
@@ -63,8 +63,8 @@ public class KeyBindingManager {
 
 	public static boolean onKeyPressedPriority(InputUtil.KeyCode keyCode) {
 		Set<KeyBinding> keyBindings = getMatchingKeyBindings(keyCode).filter(keyBinding -> keyBinding instanceof PriorityKeyBinding).collect(Collectors.toSet());
-		for(KeyBinding keyBinding : keyBindings) {
-			if(((PriorityKeyBinding) keyBinding).onPressedPriority()) {
+		for (KeyBinding keyBinding : keyBindings) {
+			if (((PriorityKeyBinding) keyBinding).onPressedPriority()) {
 				return true;
 			}
 		}

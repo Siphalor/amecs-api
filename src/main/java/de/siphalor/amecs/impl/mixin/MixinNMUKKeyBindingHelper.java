@@ -13,6 +13,6 @@ public class MixinNMUKKeyBindingHelper {
 	@Inject(method = "resetSingleKeyBinding", at = @At("HEAD"))
 	private static void resetSingleKeyBinding(KeyBinding binding, CallbackInfo callbackInfo) {
 		((IKeyBinding) binding).amecs$getKeyModifiers().unset();
-		if(binding instanceof AmecsKeyBinding) ((AmecsKeyBinding) binding).resetKeyBinding();
+		if (binding instanceof AmecsKeyBinding) ((AmecsKeyBinding) binding).resetKeyBinding();
 	}
 }

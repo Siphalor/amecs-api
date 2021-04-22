@@ -16,10 +16,11 @@ public class AmecsKeyBinding extends KeyBinding {
 
 	/**
 	 * Constructs a new amecs keybinding
-	 * @param id the id to use
-	 * @param type the input type which triggers this keybinding
-	 * @param code the the default key code
-	 * @param category the id of the category which should include this keybinding
+	 *
+	 * @param id               the id to use
+	 * @param type             the input type which triggers this keybinding
+	 * @param code             the the default key code
+	 * @param category         the id of the category which should include this keybinding
 	 * @param defaultModifiers the default modifiers
 	 */
 	public AmecsKeyBinding(Identifier id, InputUtil.Type type, int code, String category, KeyModifiers defaultModifiers) {
@@ -30,7 +31,7 @@ public class AmecsKeyBinding extends KeyBinding {
 
 	public void setPressed(boolean pressed) {
 		((IKeyBinding) this).amecs$setPressed(pressed);
-		if(pressed)
+		if (pressed)
 			onPressed();
 		else
 			onReleased();
@@ -39,12 +40,14 @@ public class AmecsKeyBinding extends KeyBinding {
 	/**
 	 * A convenience method which gets fired when the keybinding is used
 	 */
-	public void onPressed() {}
+	public void onPressed() {
+	}
 
 	/**
 	 * A convenience method which gets fired when the keybinding is stopped being used
 	 */
-	public void onReleased() {}
+	public void onReleased() {
+	}
 
 	/**
 	 * Resets this keybinding (triggered when the user clicks on the "Reset" button).

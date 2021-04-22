@@ -27,6 +27,7 @@ public class KeyModifiers {
 
 	/**
 	 * Constructs a new modifier object by a raw {@link BitSet}
+	 *
 	 * @param value the raw value with flags set
 	 * @deprecated for internal use only
 	 */
@@ -37,9 +38,10 @@ public class KeyModifiers {
 
 	/**
 	 * Constructs a new modifier object by all modifier bits
-	 * @param alt sets whether the alt flag should be set
+	 *
+	 * @param alt     sets whether the alt flag should be set
 	 * @param control sets whether the control flag should be set
-	 * @param shift sets whether the shift flag should be set
+	 * @param shift   sets whether the shift flag should be set
 	 */
 	public KeyModifiers(boolean alt, boolean control, boolean shift) {
 		this();
@@ -50,6 +52,7 @@ public class KeyModifiers {
 
 	/**
 	 * Compares this object with the currently pressed keys
+	 *
 	 * @return whether the modifiers match in the current context
 	 */
 	public boolean isPressed() {
@@ -58,6 +61,7 @@ public class KeyModifiers {
 
 	/**
 	 * Sets the raw value
+	 *
 	 * @param value the value with flags set
 	 * @deprecated for internal use only
 	 */
@@ -69,6 +73,7 @@ public class KeyModifiers {
 
 	/**
 	 * Gets the raw value
+	 *
 	 * @return the value with all flags set
 	 * @deprecated for internal use only
 	 */
@@ -79,6 +84,7 @@ public class KeyModifiers {
 
 	/**
 	 * Sets the alt flag
+	 *
 	 * @param value whether the alt flag should be activated or not
 	 */
 	public KeyModifiers setAlt(boolean value) {
@@ -88,6 +94,7 @@ public class KeyModifiers {
 
 	/**
 	 * Gets the state of the alt flag
+	 *
 	 * @return whether the alt key needs to be pressed
 	 */
 	public boolean getAlt() {
@@ -96,6 +103,7 @@ public class KeyModifiers {
 
 	/**
 	 * Sets the control flag
+	 *
 	 * @param value whether the control flag should be activated or not
 	 */
 	public KeyModifiers setControl(boolean value) {
@@ -105,6 +113,7 @@ public class KeyModifiers {
 
 	/**
 	 * Gets the state of the control flag
+	 *
 	 * @return whether the control key needs to be pressed
 	 */
 	public boolean getControl() {
@@ -113,6 +122,7 @@ public class KeyModifiers {
 
 	/**
 	 * Sets the shift flag
+	 *
 	 * @param value whether the shift flag should be activated or not
 	 */
 	public KeyModifiers setShift(boolean value) {
@@ -122,6 +132,7 @@ public class KeyModifiers {
 
 	/**
 	 * Gets the state of the shift flag
+	 *
 	 * @return whether the shift key needs to be pressed
 	 */
 	public boolean getShift() {
@@ -129,18 +140,19 @@ public class KeyModifiers {
 	}
 
 	public void set(KeyModifier keyModifier, boolean value) {
-		if(keyModifier != KeyModifier.NONE)
+		if (keyModifier != KeyModifier.NONE)
 			this.value.set(keyModifier.id, value);
 	}
 
 	public boolean get(KeyModifier keyModifier) {
-		if(keyModifier == KeyModifier.NONE)
+		if (keyModifier == KeyModifier.NONE)
 			return true;
 		return value.get(keyModifier.id);
 	}
 
 	/**
 	 * Returns whether no flag is set
+	 *
 	 * @return value == 0
 	 */
 	public boolean isUnset() {
@@ -156,6 +168,7 @@ public class KeyModifiers {
 
 	/**
 	 * Cleans up the flags by the key code present in the given key binding
+	 *
 	 * @param keyBinding the key binding from where to extract the key code
 	 */
 	public void cleanup(KeyBinding keyBinding) {
@@ -165,6 +178,7 @@ public class KeyModifiers {
 
 	/**
 	 * Returns whether this object equals another one
+	 *
 	 * @param other another modifier object
 	 * @return whether both values are equal
 	 */
