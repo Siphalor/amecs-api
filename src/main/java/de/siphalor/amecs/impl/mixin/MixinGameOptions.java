@@ -27,7 +27,9 @@ public class MixinGameOptions {
 	@Unique
 	private static final String KEY_MODIFIERS_PREFIX = "key_modifiers_";
 
-	@Shadow @Final public KeyBinding[] keysAll;
+	@Shadow
+	@Final
+	public KeyBinding[] keysAll;
 	@Unique
 	private File amecsOptionsFile;
 
