@@ -21,7 +21,7 @@ public class AmecsAPIMixinConfig implements IMixinConfigPlugin {
 
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-		if (mixinClassName.equals("MixinNMUKKeyBindingHelper")) {
+		if (mixinClassName.endsWith("MixinNMUKKeyBindingHelper")) {
 			return FabricLoader.getInstance().isModLoaded("nmuk");
 		}
 		return true;

@@ -7,6 +7,7 @@ public interface IKeyBinding {
 	InputUtil.Key amecs$getKeyCode();
 
 	int amecs$getTimesPressed();
+
 	void amecs$setTimesPressed(int timesPressed);
 
 	KeyModifiers amecs$getKeyModifiers();

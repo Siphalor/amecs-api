@@ -20,6 +20,7 @@ public class KeyBindingUtils {
 
 	/**
 	 * Gets the last (y directional) scroll delta
+	 *
 	 * @return the value
 	 */
 	public static float getLastScrollAmount() {
@@ -28,6 +29,7 @@ public class KeyBindingUtils {
 
 	/**
 	 * Sets the last (y directional) scroll amount. <b>For internal use only.</b>
+	 *
 	 * @param lastScrollAmount the amount
 	 */
 	public static void setLastScrollAmount(float lastScrollAmount) {
@@ -36,10 +38,11 @@ public class KeyBindingUtils {
 
 	/**
 	 * Gets the "official" idToKeys map
+	 *
 	 * @return the map (use with care)
 	 */
 	public static Map<String, KeyBinding> getIdToKeyBindingMap() {
-		if(idToKeyBindingMap == null) {
+		if (idToKeyBindingMap == null) {
 			try {
 				//noinspection JavaReflectionMemberAccess
 				Method method = KeyBinding.class.getDeclaredMethod("amecs$getIdToKeyBindingMap");

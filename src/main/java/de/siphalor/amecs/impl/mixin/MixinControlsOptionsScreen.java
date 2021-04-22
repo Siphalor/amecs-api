@@ -20,9 +20,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @SuppressWarnings("WeakerAccess")
 @Mixin(ControlsOptionsScreen.class)
 public abstract class MixinControlsOptionsScreen extends GameOptionsScreen {
-	@Shadow public KeyBinding focusedBinding;
+	@Shadow
+	public KeyBinding focusedBinding;
 
-	@Shadow public long time;
+	@Shadow
+	public long time;
 
 	public MixinControlsOptionsScreen(Screen screen, GameOptions gameOptions, Text text) {
 		super(screen, gameOptions, text);
@@ -32,7 +34,7 @@ public abstract class MixinControlsOptionsScreen extends GameOptionsScreen {
 	public void onClicked(double x, double y, int type, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
 		InputUtil.Key keyCode = ((IKeyBinding) focusedBinding).amecs$getKeyCode();
 		KeyModifiers keyModifiers = ((IKeyBinding) focusedBinding).amecs$getKeyModifiers();
-		if(keyCode != InputUtil.UNKNOWN_KEY) {
+		if (keyCode != InputUtil.UNKNOWN_KEY) {
 			int keyCodeCode = keyCode.getCode();
 			keyModifiers.set(KeyModifier.fromKeyCode(keyCodeCode), true);
 		}
@@ -46,7 +48,7 @@ public abstract class MixinControlsOptionsScreen extends GameOptionsScreen {
 	@Inject(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/options/GameOptions;setKeyCode(Lnet/minecraft/client/options/KeyBinding;Lnet/minecraft/client/util/InputUtil$Key;)V", ordinal = 1), cancellable = true)
 	public void onKeyPressed(int keyCode, int scanCode, int int_3, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
 		callbackInfoReturnable.setReturnValue(true);
-		if(focusedBinding.isUnbound()) {
+		if (focusedBinding.isUnbound()) {
 			gameOptions.setKeyCode(focusedBinding, InputUtil.fromKeyCode(keyCode, scanCode));
 		} else {
 			int mainKeyCode = ((IKeyBinding) focusedBinding).amecs$getKeyCode().getCode();

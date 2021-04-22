@@ -27,7 +27,9 @@ public class MixinGameOptions {
 	@Unique
 	private static final String KEY_MODIFIERS_PREFIX = "key_modifiers_";
 
-	@Shadow @Final public KeyBinding[] keysAll;
+	@Shadow
+	@Final
+	public KeyBinding[] keysAll;
 	@Unique
 	private File amecsOptionsFile;
 
@@ -37,10 +39,8 @@ public class MixinGameOptions {
 			KeyModifiers modifiers;
 			for (KeyBinding binding : keysAll) {
 				modifiers = ((IKeyBinding) binding).amecs$getKeyModifiers();
-				if (!modifiers.isUnset()) {
-					//noinspection deprecation
-					writer.println(KEY_MODIFIERS_PREFIX + binding.getTranslationKey() + ":" + modifiers.serializeValue());
-				}
+				//noinspection deprecation
+				writer.println(KEY_MODIFIERS_PREFIX + binding.getTranslationKey() + ":" + modifiers.serializeValue());
 			}
 		} catch (FileNotFoundException e) {
 			AmecsAPI.log(Level.ERROR, "Failed to save Amecs API modifiers to options file:");

@@ -1,0 +1,15 @@
+{
+	"merge-paths": [
+		"1.15",
+		"1.15->1.14",
+		"1.15->1.16->1.17"
+	],
+	"commands": [
+		{
+			"title": "Build and publish",
+			"run": "./gradlew publish",
+			"nt": "gradlew publish"
+		},
+		"git push"
+	]
+}
