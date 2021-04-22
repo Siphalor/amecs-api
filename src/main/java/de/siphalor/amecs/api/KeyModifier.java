@@ -21,9 +21,9 @@ public class KeyModifier {
 	}
 
 	public static KeyModifier fromKeyCode(int keyCode) {
-		if(ALT.matches(keyCode)) return ALT;
-		if(CONTROL.matches(keyCode)) return CONTROL;
-		if(SHIFT.matches(keyCode)) return SHIFT;
+		if (ALT.matches(keyCode)) return ALT;
+		if (CONTROL.matches(keyCode)) return CONTROL;
+		if (SHIFT.matches(keyCode)) return SHIFT;
 		return NONE;
 	}
 
