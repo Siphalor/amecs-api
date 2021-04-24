@@ -1,8 +1,10 @@
 package de.siphalor.amecs.impl;
 
 import de.siphalor.amecs.api.KeyModifier;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.text.*;
+import net.minecraft.text.BaseText;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 
 public class ModifierPrefixTextProvider {
 	private static final Text SUFFIX = new LiteralText(" + ");
@@ -15,7 +17,6 @@ public class ModifierPrefixTextProvider {
 
 	public ModifierPrefixTextProvider(String translationKey) {
 		this.translationKey = translationKey;
-		Text suffix = new LiteralText(" + ");
 	}
 
 	protected BaseText getBaseText(Variation variation) {
