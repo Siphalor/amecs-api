@@ -28,7 +28,7 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.minecraft_version}+build.${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	modCompile("de.siphalor:nmuk-${project.minecraft_major_version}:1.0+") {
+	modCompile("de.siphalor:nmuk-${project.minecraft_major_version}:1.0.0+mc21w16a") {
 		exclude module: "amecsapi-${project.minecraft_major_version}"
 	}
 }
