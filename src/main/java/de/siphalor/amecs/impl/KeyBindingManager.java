@@ -6,6 +6,7 @@ import de.siphalor.amecs.api.PriorityKeyBinding;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -39,8 +40,15 @@ public class KeyBindingManager {
 	}
 
 	public static void onKeyPressed(InputUtil.KeyCode keyCode) {
+		boolean nmuk = FabricLoader.getInstance().isModLoaded("nmuk");
 		getMatchingKeyBindings(keyCode).filter(keyBinding -> !(keyBinding instanceof PriorityKeyBinding)).forEach(keyBinding -> {
 			((IKeyBinding) keyBinding).amecs$setTimesPressed(((IKeyBinding) keyBinding).amecs$getTimesPressed() + 1);
+			if (nmuk) {
+				KeyBinding parent = NMUKProxy.getParent(keyBinding);
+				if (parent != null) {
+					((IKeyBinding) parent).amecs$setTimesPressed(((IKeyBinding) parent).amecs$getTimesPressed() + 1);
+				}
+			}
 		});
 	}
 
