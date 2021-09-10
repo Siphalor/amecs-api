@@ -1,14 +1,17 @@
 package de.siphalor.amecs.api;
 
+import java.util.Arrays;
+import java.util.BitSet;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.ApiStatus;
+
 import de.siphalor.amecs.impl.AmecsAPI;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.options.KeyBinding;
-
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.stream.Collectors;
+import net.minecraft.client.util.InputUtil;
 
 /**
  * Defines modifiers for a key binding
@@ -16,32 +19,64 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
 @Environment(EnvType.CLIENT)
 public class KeyModifiers {
-	private BitSet value;
+	/**
+	 * This field is for comparison ONLY.
+	 * <p>
+	 * Trying to change the modifiers of it will fail with an {@link UnsupportedOperationException}
+	 */
+	public static final KeyModifiers NO_MODIFIERS = new FinalKeyModifiers();
+
+	private static class FinalKeyModifiers extends KeyModifiers {
+		private static final String EXCEPTION_MESSAGE = "You must not alter this Modifiers object";
+
+		@Override
+		public KeyModifiers setValue(boolean[] value) {
+			throw new UnsupportedOperationException(EXCEPTION_MESSAGE);
+		}
+
+		@Override
+		public void set(KeyModifier keyModifier, boolean value) {
+			throw new UnsupportedOperationException(EXCEPTION_MESSAGE);
+		}
+
+		@Override
+		public void unset() {
+			throw new UnsupportedOperationException(EXCEPTION_MESSAGE);
+		}
+	}
+
+	// using a boolean array here because it is faster and needs less space
+	private final boolean[] value;
 
 	/**
 	 * Constructs new object with no modifiers set
 	 */
 	public KeyModifiers() {
-		this(new BitSet(KeyModifier.getModifierCount()));
+		this(new boolean[KeyModifier.getModifierCount()]);
 	}
 
 	/**
+	 * FOR INTERNAL USE ONLY
+	 * <p>
 	 * Constructs a new modifier object by a raw {@link BitSet}
 	 *
-	 * @param value the raw value with flags set
-	 * @deprecated for internal use only
+	 * @param value
+	 *        the raw value with flags set
 	 */
-	@Deprecated
-	public KeyModifiers(BitSet value) {
+	@ApiStatus.Internal
+	public KeyModifiers(boolean[] value) {
+		if (value.length != KeyModifier.getModifierCount()) {
+			throw new IllegalArgumentException("value.length != KeyModifier.getModifierCount(): " + KeyModifier.getModifierCount());
+		}
 		this.value = value;
 	}
 
 	/**
 	 * Constructs a new modifier object by all modifier bits
 	 *
-	 * @param alt     sets whether the alt flag should be set
+	 * @param alt sets whether the alt flag should be set
 	 * @param control sets whether the control flag should be set
-	 * @param shift   sets whether the shift flag should be set
+	 * @param shift sets whether the shift flag should be set
 	 */
 	public KeyModifiers(boolean alt, boolean control, boolean shift) {
 		this();
@@ -60,26 +95,42 @@ public class KeyModifiers {
 	}
 
 	/**
+	 * FOR INTERNAL USE ONLY
+	 * <p>
 	 * Sets the raw value
 	 *
 	 * @param value the value with flags set
-	 * @deprecated for internal use only
 	 */
-	@Deprecated
-	public KeyModifiers setValue(BitSet value) {
-		this.value = (BitSet) value.clone();
+	@ApiStatus.Internal
+	public KeyModifiers setValue(boolean[] value) {
+		int length = this.value.length;
+		if (value.length != length) {
+			throw new IllegalArgumentException("value != this.value.length: " + length);
+		}
+		System.arraycopy(value, 0, this.value, 0, length);
 		return this;
 	}
 
 	/**
+	 * FOR INTERNAL USE ONLY
+	 * <p>
 	 * Gets the raw value
 	 *
 	 * @return the value with all flags set
-	 * @deprecated for internal use only
 	 */
-	@Deprecated
-	public BitSet getValue() {
+	@ApiStatus.Internal
+	public boolean[] getValue() {
 		return value;
+	}
+
+	/**
+	 * FOR INTERNAL USE ONLY
+	 * <p>
+	 * copies the modifiers of the other KeyModifiers object into this
+	 */
+	@ApiStatus.Internal
+	public void copyModifiers(KeyModifiers other) {
+		setValue(other.getValue());
 	}
 
 	/**
@@ -88,7 +139,7 @@ public class KeyModifiers {
 	 * @param value whether the alt flag should be activated or not
 	 */
 	public KeyModifiers setAlt(boolean value) {
-		this.value.set(KeyModifier.ALT.id, value);
+		set(KeyModifier.ALT, value);
 		return this;
 	}
 
@@ -98,7 +149,7 @@ public class KeyModifiers {
 	 * @return whether the alt key needs to be pressed
 	 */
 	public boolean getAlt() {
-		return value.get(KeyModifier.ALT.id);
+		return get(KeyModifier.ALT);
 	}
 
 	/**
@@ -107,7 +158,7 @@ public class KeyModifiers {
 	 * @param value whether the control flag should be activated or not
 	 */
 	public KeyModifiers setControl(boolean value) {
-		this.value.set(KeyModifier.CONTROL.id, value);
+		set(KeyModifier.CONTROL, value);
 		return this;
 	}
 
@@ -117,7 +168,7 @@ public class KeyModifiers {
 	 * @return whether the control key needs to be pressed
 	 */
 	public boolean getControl() {
-		return value.get(KeyModifier.CONTROL.id);
+		return get(KeyModifier.CONTROL);
 	}
 
 	/**
@@ -126,7 +177,7 @@ public class KeyModifiers {
 	 * @param value whether the shift flag should be activated or not
 	 */
 	public KeyModifiers setShift(boolean value) {
-		this.value.set(KeyModifier.SHIFT.id, value);
+		set(KeyModifier.SHIFT, value);
 		return this;
 	}
 
@@ -136,18 +187,20 @@ public class KeyModifiers {
 	 * @return whether the shift key needs to be pressed
 	 */
 	public boolean getShift() {
-		return value.get(KeyModifier.SHIFT.id);
+		return get(KeyModifier.SHIFT);
 	}
 
 	public void set(KeyModifier keyModifier, boolean value) {
-		if (keyModifier != KeyModifier.NONE)
-			this.value.set(keyModifier.id, value);
+		if (keyModifier != KeyModifier.NONE) {
+			this.value[keyModifier.id] = value;
+		}
 	}
 
 	public boolean get(KeyModifier keyModifier) {
-		if (keyModifier == KeyModifier.NONE)
+		if (keyModifier == KeyModifier.NONE) {
 			return true;
-		return value.get(keyModifier.id);
+		}
+		return value[keyModifier.id];
 	}
 
 	/**
@@ -156,14 +209,14 @@ public class KeyModifiers {
 	 * @return value == 0
 	 */
 	public boolean isUnset() {
-		return value.isEmpty();
+		return !ArrayUtils.contains(value, true);
 	}
 
 	/**
 	 * Clears all flags
 	 */
 	public void unset() {
-		value.clear();
+		Arrays.fill(value, false);
 	}
 
 	/**
@@ -172,8 +225,8 @@ public class KeyModifiers {
 	 * @param keyBinding the key binding from where to extract the key code
 	 */
 	public void cleanup(KeyBinding keyBinding) {
-		int keyCode = ((IKeyBinding) keyBinding).amecs$getKeyCode().getKeyCode();
-		set(KeyModifier.fromKeyCode(keyCode), false);
+		InputUtil.KeyCode key = ((IKeyBinding) keyBinding).amecs$getBoundKey();
+		set(KeyModifier.fromKey(key), false);
 	}
 
 	/**
@@ -183,24 +236,63 @@ public class KeyModifiers {
 	 * @return whether both values are equal
 	 */
 	public boolean equals(KeyModifiers other) {
-		return value.equals(other.value);
+		return Arrays.equals(value, other.value);
 	}
 
+	@Override
+	public String toString() {
+		return "KeyModifiers [alt=" + getAlt() + ", control=" + getControl() + ", shift=" + getShift() + "]";
+	}
+
+	// new format even if it needs more characters because it is more user friendly (and simpler to parse). Not everyone knows about bit masks
+	// it could be discussed whether this new is really "better" but i leave it for now. It is backward compatible so nothing breaks
 	/**
-	 * @deprecated for internal use only
+	 * FOR INTERNAL USE ONLY
+	 *
+	 * @return the serialized string representation of the modifiers
 	 */
-	@Deprecated
+	@ApiStatus.Internal
 	public String serializeValue() {
-		return Arrays.stream(value.toLongArray()).mapToObj(Long::toHexString).collect(Collectors.joining(","));
+		StringBuilder sb = new StringBuilder();
+		for (boolean b : value) {
+			sb.append(b ? 1 : 0);
+			sb.append(",");
+		}
+		// remove trailing comma
+		// this will fail if value.length is 0. But that would be useless anyways
+		sb.setLength(sb.length() - ",".length());
+		return sb.toString();
 	}
 
 	/**
-	 * @deprecated for internal use only
+	 * FOR INTERNAL USE ONLY
+	 *
+	 * @return the deserialized modifier array
 	 */
-	@Deprecated
-	public static BitSet deserializeValue(String value) {
-		if (value.isEmpty())
-			return new BitSet(KeyModifier.getModifierCount());
-		return BitSet.valueOf(Arrays.stream(value.split(",")).mapToLong(Long::valueOf).toArray());
+	@ApiStatus.Internal
+	public static boolean[] deserializeValue(String value) {
+		boolean[] ret = new boolean[KeyModifier.getModifierCount()];
+		if (value.isEmpty()) {
+			return ret;
+		}
+		// backward compatibility for old format
+		if (!value.contains(",")) {
+			// we never had more than one value with the fat long
+			long packedModifiers = Long.parseLong(value, 16);
+			for (KeyModifier keyModifier : KeyModifier.VALUES) {
+				if (keyModifier == KeyModifier.NONE) {
+					continue;
+				}
+				long mask = (1 << keyModifier.id);
+				ret[keyModifier.id] = (packedModifiers & mask) == mask;
+			}
+			return ret;
+		}
+		// we have the new format
+		int i = 0;
+		for (String p : value.split(",")) {
+			ret[i++] = p.equals("1");
+		}
+		return ret;
 	}
 }
