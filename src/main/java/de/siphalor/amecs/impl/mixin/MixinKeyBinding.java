@@ -1,21 +1,7 @@
 package de.siphalor.amecs.impl.mixin;
 
-import de.siphalor.amecs.api.AmecsKeyBinding;
-import de.siphalor.amecs.api.KeyModifiers;
-import de.siphalor.amecs.impl.AmecsAPI;
-import de.siphalor.amecs.impl.KeyBindingManager;
-import de.siphalor.amecs.impl.ModifierPrefixTextProvider;
-import de.siphalor.amecs.impl.duck.IKeyBinding;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.BaseText;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import java.util.Map;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,7 +11,19 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Map;
+import de.siphalor.amecs.api.AmecsKeyBinding;
+import de.siphalor.amecs.api.KeyModifier;
+import de.siphalor.amecs.api.KeyModifiers;
+import de.siphalor.amecs.impl.KeyBindingManager;
+import de.siphalor.amecs.impl.ModifierPrefixTextProvider;
+import de.siphalor.amecs.impl.duck.IKeyBinding;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
+import net.minecraft.text.Text;
 
 @SuppressWarnings("WeakerAccess")
 @Environment(EnvType.CLIENT)
@@ -64,6 +62,11 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 	}
 
 	@Override
+	public void amecs$incrementTimesPressed() {
+		timesPressed++;
+	}
+	
+	@Override
 	public KeyModifiers amecs$getKeyModifiers() {
 		return keyModifiers;
 	}
@@ -78,27 +81,20 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 	public void getLocalizedName(CallbackInfoReturnable<Text> callbackInfoReturnable) {
 		Text name = boundKey.getLocalizedText();
 		Text fullName;
-		BaseText temp;
 		TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
 		ModifierPrefixTextProvider.Variation variation = ModifierPrefixTextProvider.Variation.WIDEST;
 		do {
 			fullName = name;
-			if (keyModifiers.getControl()) {
-				temp = AmecsAPI.CONTROL_PREFIX.getText(variation);
-				temp.append(fullName);
-				fullName = temp;
+			for(KeyModifier keyModifier : KeyModifier.values()) {
+				if(keyModifier == KeyModifier.NONE) {
+					continue;
+				}
+				
+				if(keyModifiers.get(keyModifier)) {
+					fullName = keyModifier.textProvider.getText(variation).append(fullName);
+				}
 			}
-			if (keyModifiers.getShift()) {
-				temp = AmecsAPI.SHIFT_PREFIX.getText(variation);
-				temp.append(fullName);
-				fullName = temp;
-			}
-			if (keyModifiers.getAlt()) {
-				temp = AmecsAPI.ALT_PREFIX.getText(variation);
-				temp.append(fullName);
-				fullName = temp;
-			}
-		} while ((variation = variation.shorter) != null && textRenderer.getWidth(fullName) > 70);
+		} while ((variation = variation.getSmaller()) != null && textRenderer.getWidth(fullName) > 70);
 
 		callbackInfoReturnable.setReturnValue(fullName);
 	}

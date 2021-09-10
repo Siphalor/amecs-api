@@ -1,11 +1,12 @@
 package de.siphalor.amecs.api;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.option.KeyBinding;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.option.KeyBinding;
 
 /**
  * Utility methods and constants for Amecs and vanilla key bindings
@@ -44,6 +45,9 @@ public class KeyBindingUtils {
 	public static Map<String, KeyBinding> getIdToKeyBindingMap() {
 		if (idToKeyBindingMap == null) {
 			try {
+				//reflections accessors should be initialized statically if the are static
+				//but in this case its fine because we only do this once because it is cached in a static field
+				
 				//noinspection JavaReflectionMemberAccess
 				Method method = KeyBinding.class.getDeclaredMethod("amecs$getIdToKeyBindingMap");
 				method.setAccessible(true);

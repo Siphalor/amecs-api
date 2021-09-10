@@ -1,5 +1,10 @@
 package de.siphalor.amecs.impl;
 
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import de.siphalor.amecs.api.KeyBindingUtils;
 import de.siphalor.amecs.api.KeyModifier;
 import de.siphalor.amecs.api.PriorityKeyBinding;
@@ -11,57 +16,85 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 @Environment(EnvType.CLIENT)
 public class KeyBindingManager {
-	public static Map<InputUtil.Key, ConcurrentLinkedQueue<KeyBinding>> keysById = new HashMap<>();
+	//split it in two maps because it is ways faster to only stream the map with the objects we need
+	//rather than streaming all and throwing out a bunch every time
+	public static Map<InputUtil.Key, List<KeyBinding>> keysById = new HashMap<>();
+	public static Map<InputUtil.Key, List<KeyBinding>> keysById_priority = new HashMap<>();
 
-	public static void register(KeyBinding keyBinding) {
+	private static List<KeyBinding> addKeyBindingToListFromMap(Map<InputUtil.Key, List<KeyBinding>> keysById_map, KeyBinding keyBinding) {
 		InputUtil.Key keyCode = ((IKeyBinding) keyBinding).amecs$getKeyCode();
-		if (keysById.containsKey(keyCode)) {
-			keysById.get(keyCode).add(keyBinding);
+		List<KeyBinding> keyBindings = keysById_map.get(keyCode);
+		if (keyBindings == null) {
+			keyBindings = new ArrayList<>();
+			keyBindings.add(keyBinding);
+			keysById_map.put(keyCode, keyBindings);
+		}
+		keyBindings.add(keyBinding);
+		return keyBindings;
+	}
+	
+	public static void register(KeyBinding keyBinding) {
+		if(keyBinding instanceof PriorityKeyBinding) {
+			addKeyBindingToListFromMap(keysById_priority, keyBinding);
 		} else {
-			keysById.put(keyCode, new ConcurrentLinkedQueue<>(Collections.singleton(keyBinding)));
+			addKeyBindingToListFromMap(keysById, keyBinding);
 		}
 	}
 
-	public static Stream<KeyBinding> getMatchingKeyBindings(InputUtil.Key keyCode) {
-		Queue<KeyBinding> keyBindingQueue = keysById.get(keyCode);
-		if (keyBindingQueue == null) return Stream.empty();
-		Stream<KeyBinding> result = keyBindingQueue.stream().filter(keyBinding -> ((IKeyBinding) keyBinding).amecs$getKeyModifiers().isPressed());
-		Set<KeyBinding> keyBindings = result.collect(Collectors.toSet());
+	public static Stream<KeyBinding> getMatchingKeyBindings(InputUtil.Key keyCode, boolean priority) {
+		List<KeyBinding> keyBindingList = (priority ? keysById_priority : keysById).get(keyCode);
+		if (keyBindingList == null)
+			return Stream.empty();
+		// this looks not right: If you have a kb: alt + y and shift + alt + y and you press shift + alt + y both will be triggered
+		// Correction: It works as it should. Leaving this comments for future readers
+		Stream<KeyBinding> result = keyBindingList.stream().filter(keyBinding -> ((IKeyBinding) keyBinding).amecs$getKeyModifiers().isPressed());
+		List<KeyBinding> keyBindings = result.collect(Collectors.toList());
 		if (keyBindings.isEmpty())
-			return keysById.get(keyCode).stream().filter(keyBinding -> ((IKeyBinding) keyBinding).amecs$getKeyModifiers().isUnset());
+			return keyBindingList.stream().filter(keyBinding -> ((IKeyBinding) keyBinding).amecs$getKeyModifiers().isUnset());
 		return keyBindings.stream();
 	}
 
 	public static void onKeyPressed(InputUtil.Key keyCode) {
 		boolean nmuk = FabricLoader.getInstance().isModLoaded("nmuk");
-		getMatchingKeyBindings(keyCode).filter(keyBinding -> !(keyBinding instanceof PriorityKeyBinding)).forEach(keyBinding -> {
-			((IKeyBinding) keyBinding).amecs$setTimesPressed(((IKeyBinding) keyBinding).amecs$getTimesPressed() + 1);
+		getMatchingKeyBindings(keyCode, false).forEach(keyBinding -> {
+			((IKeyBinding) keyBinding).amecs$incrementTimesPressed();
 			if (nmuk) {
 				KeyBinding parent = NMUKProxy.getParent(keyBinding);
 				if (parent != null) {
-					((IKeyBinding) parent).amecs$setTimesPressed(((IKeyBinding) parent).amecs$getTimesPressed() + 1);
+					((IKeyBinding) parent).amecs$incrementTimesPressed();
 				}
 			}
 		});
 	}
 
+	private static Stream<KeyBinding> getKeyBindingsFromMap(Map<InputUtil.Key, List<KeyBinding>> keysById_map) {
+		return keysById_map.values().stream().flatMap(Collection::stream);
+	}
+	
+	private static void forEachKeyBinding(Consumer<KeyBinding> consumer) {
+		getKeyBindingsFromMap(keysById_priority).forEach(consumer);
+		getKeyBindingsFromMap(keysById).forEach(consumer);
+	}
+	
+	private static void forEachKeyBindingWithKey(InputUtil.Key key, Consumer<KeyBinding> consumer) {
+		getMatchingKeyBindings(key, true).forEach(consumer);
+		getMatchingKeyBindings(key, false).forEach(consumer);
+	}
+	
 	public static void updatePressedStates() {
-		Collection<KeyBinding> keyBindings = KeyBindingManager.keysById.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
-		for (KeyBinding keyBinding : keyBindings) {
-			boolean pressed = !keyBinding.isUnbound() && ((IKeyBinding) keyBinding).amecs$getKeyCode().getCategory() == InputUtil.Type.KEYSYM && InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), ((IKeyBinding) keyBinding).amecs$getKeyCode().getCode());
+		long windowHandle = MinecraftClient.getInstance().getWindow().getHandle();
+		forEachKeyBinding(keyBinding -> {
+			InputUtil.Key key = ((IKeyBinding) keyBinding).amecs$getKeyCode();
+			boolean pressed = !keyBinding.isUnbound() && key.getCategory() == InputUtil.Type.KEYSYM && InputUtil.isKeyPressed(windowHandle, key.getCode());
 			keyBinding.setPressed(pressed);
-		}
+		});
 	}
 
 	public static void updateKeysByCode() {
 		keysById.clear();
+		keysById_priority.clear();
 		KeyBindingUtils.getIdToKeyBindingMap().values().forEach(KeyBindingManager::register);
 	}
 
@@ -70,18 +103,13 @@ public class KeyBindingManager {
 	}
 
 	public static boolean onKeyPressedPriority(InputUtil.Key keyCode) {
-		Set<KeyBinding> keyBindings = getMatchingKeyBindings(keyCode).filter(keyBinding -> keyBinding instanceof PriorityKeyBinding).collect(Collectors.toSet());
-		for (KeyBinding keyBinding : keyBindings) {
-			if (((PriorityKeyBinding) keyBinding).onPressedPriority()) {
-				return true;
-			}
-		}
-		return false;
+		Optional<KeyBinding> keyBindings = getMatchingKeyBindings(keyCode, true).filter(keyBinding -> ((PriorityKeyBinding) keyBinding).onPressedPriority()).findFirst();
+		return keyBindings.isPresent();
 	}
 
 	public static void setKeyPressed(InputUtil.Key keyCode, boolean pressed) {
 		AmecsAPI.CURRENT_MODIFIERS.set(KeyModifier.fromKeyCode(keyCode.getCode()), pressed);
 
-		getMatchingKeyBindings(keyCode).forEach(keyBinding -> keyBinding.setPressed(pressed));
+		forEachKeyBindingWithKey(keyCode, keyBinding -> keyBinding.setPressed(pressed));
 	}
 }

@@ -20,16 +20,7 @@ public class ModifierPrefixTextProvider {
 	}
 
 	protected BaseText getBaseText(Variation variation) {
-		switch (variation) {
-			case NORMAL:
-				return new TranslatableText(translationKey);
-			case SHORT:
-				return new TranslatableText(translationKey + ".short");
-			case COMPRESSED:
-			case TINY:
-				return new TranslatableText(translationKey + ".tiny");
-		}
-		return null; // unreachable
+		return variation.getTranslatableText(translationKey);
 	}
 
 	public BaseText getText(Variation variation) {
@@ -42,15 +33,30 @@ public class ModifierPrefixTextProvider {
 		return text;
 	}
 
-	public enum Variation {
-		COMPRESSED(null), TINY(COMPRESSED), SHORT(TINY), NORMAL(SHORT);
+	public static enum Variation {
+		COMPRESSED(".tiny"),
+		TINY(".tiny"),
+		SHORT(".short"),
+		NORMAL("");
 
-		public static Variation WIDEST = NORMAL;
+		public static final Variation WIDEST = NORMAL;
 
-		public final Variation shorter;
+		public final String translateKeySuffix;
 
-		Variation(Variation shorter) {
-			this.shorter = shorter;
+		private Variation(String translateKeySuffix) {
+			this.translateKeySuffix = translateKeySuffix;
+		}
+		
+		public TranslatableText getTranslatableText(String translationKey) {
+			return new TranslatableText(translationKey + translateKeySuffix);
+		}
+		
+		public Variation getSmaller(int amount) {
+			return Variation.values()[Math.max(this.ordinal() - amount, 0)];
+		}
+		
+		public Variation getSmaller() {
+			return getSmaller(1);
 		}
 	}
 }
