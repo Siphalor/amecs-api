@@ -133,8 +133,7 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 
 	@Inject(method = "updateKeysByCode", at = @At("HEAD"), cancellable = true)
 	private static void updateKeyBindings(CallbackInfo callbackInfo) {
-		KeyBindingManager.keysById.clear();
-		keysById.values().forEach(KeyBindingManager::register);
+		KeyBindingManager.updateKeysByCode();
 		callbackInfo.cancel();
 	}
 

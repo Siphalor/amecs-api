@@ -28,9 +28,9 @@ public class KeyBindingManager {
 		List<KeyBinding> keyBindings = keysById_map.get(keyCode);
 		if (keyBindings == null) {
 			keyBindings = new ArrayList<>();
-			keyBindings.add(keyBinding);
 			keysById_map.put(keyCode, keyBindings);
 		}
+		assert !keyBindings.contains(keyBinding);
 		keyBindings.add(keyBinding);
 		return keyBindings;
 	}
@@ -42,7 +42,7 @@ public class KeyBindingManager {
 			addKeyBindingToListFromMap(keysById, keyBinding);
 		}
 	}
-
+	
 	public static Stream<KeyBinding> getMatchingKeyBindings(InputUtil.Key keyCode, boolean priority) {
 		List<KeyBinding> keyBindingList = (priority ? keysById_priority : keysById).get(keyCode);
 		if (keyBindingList == null)
@@ -103,6 +103,8 @@ public class KeyBindingManager {
 	}
 
 	public static boolean onKeyPressedPriority(InputUtil.Key keyCode) {
+		//because streams do evaluation lazy this code does only call onPressedPriority on so many keyBinding until one returns true
+		//Or if no one returns true all are called and an empty optional is returned
 		Optional<KeyBinding> keyBindings = getMatchingKeyBindings(keyCode, true).filter(keyBinding -> ((PriorityKeyBinding) keyBinding).onPressedPriority()).findFirst();
 		return keyBindings.isPresent();
 	}

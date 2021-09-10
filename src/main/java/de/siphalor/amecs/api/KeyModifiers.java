@@ -175,7 +175,7 @@ public class KeyModifiers {
 	 * @return value == 0
 	 */
 	public boolean isUnset() {
-		return ArrayUtils.isEmpty(value);
+		return !ArrayUtils.contains(value, true);
 	}
 
 	/**
@@ -203,6 +203,11 @@ public class KeyModifiers {
 	 */
 	public boolean equals(KeyModifiers other) {
 		return Arrays.equals(value, other.value);
+	}
+
+	@Override
+	public String toString() {
+		return "KeyModifiers [alt=" + getAlt() + ", control=" + getControl() + ", shift=" + getShift() + "]";
 	}
 
 	//new format even if it needs more characters because it is more user friendly (and simpler to parse). No everyone knows about bit masks
