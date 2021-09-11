@@ -44,7 +44,6 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 	// set it to a NOPMap meaning everything done with this map is ignored. Because setting it to null would cause problems
 	// ... even if we remove the put in the KeyBinding constructor. Because maybe in the future this map is used elsewhere or a other mod uses it
 	@Shadow
-	@Final
 	private static Map<InputUtil.Key, KeyBinding> keyToBindings = NOPMap.nopMap();
 
 	@Unique

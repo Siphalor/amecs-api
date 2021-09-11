@@ -67,9 +67,10 @@ public class KeyBindingUtils {
 	 * <p> This is possible even after the game initialized
 	 * 
 	 * @param keyBinding 
+	 * @return whether the keyBinding was removed. It is not removed if it was not contained
 	 */
-	public static void unregisterKeyBinding(KeyBinding keyBinding) {
-		KeyBindingManager.unregister(keyBinding);
+	public static boolean unregisterKeyBinding(KeyBinding keyBinding) {
+		return KeyBindingManager.unregister(keyBinding);
 	}
 	
 	/**
@@ -78,10 +79,11 @@ public class KeyBindingUtils {
 	 * 
 	 * @see #unregisterKeyBinding(KeyBinding)
 	 * @param id the translation key
+	 * @return whether the keyBinding was removed. It is not removed if it was not contained
 	 */
-	public static void unregisterKeyBinding(String id) {
+	public static boolean unregisterKeyBinding(String id) {
 		KeyBinding keyBinding = getIdToKeyBindingMap().remove(id);
-		KeyBindingManager.unregister(keyBinding);
+		return KeyBindingManager.unregister(keyBinding);
 	}
 	
 	/**
@@ -90,8 +92,9 @@ public class KeyBindingUtils {
 	 * <p> This is possible even after the game initialized
 	 * 
 	 * @param keyBinding 
+	 * @return whether the keyBinding was added. It is not added if it is already contained
 	 */
-	public static void registerHiddenKeyBinding(KeyBinding keyBinding) {
-		KeyBindingManager.register(keyBinding);
+	public static boolean registerHiddenKeyBinding(KeyBinding keyBinding) {
+		return KeyBindingManager.register(keyBinding);
 	}
 }

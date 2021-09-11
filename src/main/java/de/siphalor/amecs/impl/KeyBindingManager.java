@@ -23,35 +23,57 @@ public class KeyBindingManager {
 	public static Map<InputUtil.Key, List<KeyBinding>> keysById = new HashMap<>();
 	public static Map<InputUtil.Key, List<KeyBinding>> keysById_priority = new HashMap<>();
 	
-	private static void removeKeyBindingFromListFromMap(Map<InputUtil.Key, List<KeyBinding>> keysById_map, KeyBinding keyBinding) {
+	/**
+	 * 
+	 * @param keysById_map
+	 * @param keyBinding
+	 * @return whether the keyBinding was removed. It is not removed if it was not contained
+	 */
+	private static boolean removeKeyBindingFromListFromMap(Map<InputUtil.Key, List<KeyBinding>> keysById_map, KeyBinding keyBinding) {
 		//we need to get the backing list to remove elements thus we can not use any of the other methods that return streams
 		InputUtil.Key keyCode = ((IKeyBinding) keyBinding).amecs$getBoundKey();
 		List<KeyBinding> keyBindings = keysById_map.get(keyCode);
 		if(keyBindings == null) {
-			return;
+			return false;
 		}
+		boolean removed = false;
 		//while loop to ensure that we remove all equal KeyBindings if for some reason there should be duplicates
 		while(keyBindings.remove(keyBinding)) {
+			removed = true;
 		}
+		return removed;
 	}
 	
-	private static List<KeyBinding> addKeyBindingToListFromMap(Map<InputUtil.Key, List<KeyBinding>> keysById_map, KeyBinding keyBinding) {
+	/**
+	 * 
+	 * @param keysById_map
+	 * @param keyBinding
+	 * @return whether the keyBinding was added. It is not added if it is already contained
+	 */
+	private static boolean addKeyBindingToListFromMap(Map<InputUtil.Key, List<KeyBinding>> keysById_map, KeyBinding keyBinding) {
 		InputUtil.Key keyCode = ((IKeyBinding) keyBinding).amecs$getBoundKey();
 		List<KeyBinding> keyBindings = keysById_map.get(keyCode);
 		if (keyBindings == null) {
 			keyBindings = new ArrayList<>();
 			keysById_map.put(keyCode, keyBindings);
 		}
-		assert !keyBindings.contains(keyBinding);
+		if(keyBindings.contains(keyBinding)) {
+			return false;
+		}
 		keyBindings.add(keyBinding);
-		return keyBindings;
+		return true;
 	}
 	
-	public static void register(KeyBinding keyBinding) {
+	/**
+	 * 
+	 * @param keyBinding
+	 * @return whether the keyBinding was added. It is not added if it is already contained
+	 */
+	public static boolean register(KeyBinding keyBinding) {
 		if(keyBinding instanceof PriorityKeyBinding) {
-			addKeyBindingToListFromMap(keysById_priority, keyBinding);
+			return addKeyBindingToListFromMap(keysById_priority, keyBinding);
 		} else {
-			addKeyBindingToListFromMap(keysById, keyBinding);
+			return addKeyBindingToListFromMap(keysById, keyBinding);
 		}
 	}
 	
@@ -104,15 +126,22 @@ public class KeyBindingManager {
 		});
 	}
 
-	public static void unregister(KeyBinding keyBinding) {
+	/**
+	 * 
+	 * @param keyBinding
+	 * @return whether the keyBinding was removed. It is not removed if it was not contained
+	 */
+	public static boolean unregister(KeyBinding keyBinding) {
 		if(keyBinding == null) {
-			return;
+			return false;
 		}
 		//do not rebuild the entrie map if we do not have to
 		// KeyBinding.updateKeysByCode();
 		//instead
-		removeKeyBindingFromListFromMap(keysById, keyBinding);
-		removeKeyBindingFromListFromMap(keysById_priority, keyBinding);
+		boolean removed = false;
+		removed |= removeKeyBindingFromListFromMap(keysById, keyBinding);
+		removed |= removeKeyBindingFromListFromMap(keysById_priority, keyBinding);
+		return removed;
 	}
 
 	public static void updateKeysByCode() {
