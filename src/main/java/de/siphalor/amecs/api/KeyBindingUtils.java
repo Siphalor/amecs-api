@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import de.siphalor.amecs.impl.KeyBindingManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.option.KeyBinding;
@@ -61,11 +62,36 @@ public class KeyBindingUtils {
 	}
 
 	/**
-	 * Unregisters a keybinding with the given id
+	 * Unregisters a keybinding from input querying but is NOT removed from the controls GUI 
+	 * <br> if you unregister a keybinding which is already in the controls GUI you can call {@link #registerHiddenKeyBinding(KeyBinding)} with this keybinding to undo this
+	 * <p> This is possible even after the game initialized
+	 * 
+	 * @param keyBinding 
 	 */
-	@SuppressWarnings("unused")
+	public static void unregisterKeyBinding(KeyBinding keyBinding) {
+		KeyBindingManager.unregister(keyBinding);
+	}
+	
+	/**
+	 * Unregisters a keybinding with the given id
+	 * <br> for more details {@link #unregisterKeyBinding(KeyBinding)}
+	 * 
+	 * @see #unregisterKeyBinding(KeyBinding)
+	 * @param id the translation key
+	 */
 	public static void unregisterKeyBinding(String id) {
-		getIdToKeyBindingMap().remove(id);
-		KeyBinding.updateKeysByCode();
+		KeyBinding keyBinding = getIdToKeyBindingMap().remove(id);
+		KeyBindingManager.unregister(keyBinding);
+	}
+	
+	/**
+	 * Registers a keybinding for input querying but is NOT added to the controls GUI 
+	 * <br> you can register a keybinding which is already in the controls GUI but was removed from input querying via {@link #unregisterKeyBinding(KeyBinding)}
+	 * <p> This is possible even after the game initialized
+	 * 
+	 * @param keyBinding 
+	 */
+	public static void registerHiddenKeyBinding(KeyBinding keyBinding) {
+		KeyBindingManager.register(keyBinding);
 	}
 }

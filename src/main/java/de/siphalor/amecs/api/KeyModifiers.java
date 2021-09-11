@@ -11,6 +11,7 @@ import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 
 /**
  * Defines modifiers for a key binding
@@ -18,6 +19,28 @@ import net.minecraft.client.option.KeyBinding;
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
 @Environment(EnvType.CLIENT)
 public class KeyModifiers {
+	/**
+	 * This field is for comparison ONLY. <p>
+	 * Trying to change the modifiers of it will fail with an UnsupportedOperationException
+	 */
+	public static final KeyModifiers NO_MODIFIERS = new KeyModifiersNONE();
+	
+	private static class KeyModifiersNONE extends KeyModifiers {
+		private static final String EXCEPTION_MESSAGE = "You must not alter this Modifiers object";
+		@Override
+		public KeyModifiers setValue(boolean[] value) {
+			throw new UnsupportedOperationException(EXCEPTION_MESSAGE);
+		}
+		@Override
+		public void set(KeyModifier keyModifier, boolean value) {
+			throw new UnsupportedOperationException(EXCEPTION_MESSAGE);
+		}
+		@Override
+		public void unset() {
+			throw new UnsupportedOperationException(EXCEPTION_MESSAGE);
+		}
+	}
+	
 	//using a boolean array here because it is faster and needs less space
 	private final boolean[] value;
 
@@ -107,7 +130,7 @@ public class KeyModifiers {
 	 * @param value whether the alt flag should be activated or not
 	 */
 	public KeyModifiers setAlt(boolean value) {
-		this.value[KeyModifier.ALT.id] = value;
+		set(KeyModifier.ALT, value);
 		return this;
 	}
 
@@ -117,7 +140,7 @@ public class KeyModifiers {
 	 * @return whether the alt key needs to be pressed
 	 */
 	public boolean getAlt() {
-		return this.value[KeyModifier.ALT.id];
+		return get(KeyModifier.ALT);
 	}
 
 	/**
@@ -126,7 +149,7 @@ public class KeyModifiers {
 	 * @param value whether the control flag should be activated or not
 	 */
 	public KeyModifiers setControl(boolean value) {
-		this.value[KeyModifier.CONTROL.id] = value;
+		set(KeyModifier.CONTROL, value);
 		return this;
 	}
 
@@ -136,7 +159,7 @@ public class KeyModifiers {
 	 * @return whether the control key needs to be pressed
 	 */
 	public boolean getControl() {
-		return this.value[KeyModifier.CONTROL.id];
+		return get(KeyModifier.CONTROL);
 	}
 
 	/**
@@ -145,7 +168,7 @@ public class KeyModifiers {
 	 * @param value whether the shift flag should be activated or not
 	 */
 	public KeyModifiers setShift(boolean value) {
-		this.value[KeyModifier.SHIFT.id] = value;
+		set(KeyModifier.SHIFT, value);
 		return this;
 	}
 
@@ -155,7 +178,7 @@ public class KeyModifiers {
 	 * @return whether the shift key needs to be pressed
 	 */
 	public boolean getShift() {
-		return this.value[KeyModifier.SHIFT.id];
+		return get(KeyModifier.SHIFT);
 	}
 
 	public void set(KeyModifier keyModifier, boolean value) {
@@ -191,8 +214,8 @@ public class KeyModifiers {
 	 * @param keyBinding the key binding from where to extract the key code
 	 */
 	public void cleanup(KeyBinding keyBinding) {
-		int keyCode = ((IKeyBinding) keyBinding).amecs$getKeyCode().getCode();
-		set(KeyModifier.fromKeyCode(keyCode), false);
+		InputUtil.Key key = ((IKeyBinding) keyBinding).amecs$getBoundKey();
+		set(KeyModifier.fromKey(key), false);
 	}
 
 	/**
@@ -240,7 +263,7 @@ public class KeyModifiers {
 		if(!value.contains(",")) {
 			//we never had more than one value with the fat long
 			long packedModifiers = Long.parseLong(value, 16);
-			for(KeyModifier keyModifier : KeyModifier.values()) {
+			for(KeyModifier keyModifier : KeyModifier.VALUES) {
 				if(keyModifier == KeyModifier.NONE) {
 					continue;
 				}
@@ -249,6 +272,7 @@ public class KeyModifiers {
 			}
 			return ret;
 		}
+		//we have the new format
 		int i = 0;
 		for(String p : value.split(",")) {
 			ret[i++] = p.equals("1");

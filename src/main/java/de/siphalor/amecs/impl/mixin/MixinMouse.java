@@ -1,5 +1,13 @@
 package de.siphalor.amecs.impl.mixin;
 
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+
 import de.siphalor.amecs.api.KeyBindingUtils;
 import de.siphalor.amecs.api.KeyModifier;
 import de.siphalor.amecs.api.KeyModifiers;
@@ -12,13 +20,6 @@ import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.option.ControlsOptionsScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 // TODO: Fix the priority when Mixin 0.8 is a thing and try again (-> MaLiLib causes incompatibilities)
 @Environment(EnvType.CLIENT)
@@ -40,9 +41,9 @@ public class MixinMouse {
 		if (client.currentScreen instanceof ControlsOptionsScreen) {
 			KeyBinding focusedBinding = ((ControlsOptionsScreen) client.currentScreen).focusedBinding;
 			if (focusedBinding != null) {
-				if (((IKeyBinding) focusedBinding).amecs$getKeyCode() != InputUtil.UNKNOWN_KEY) {
+				if (!((IKeyBinding) focusedBinding).amecs$getBoundKey().equals(InputUtil.UNKNOWN_KEY)) {
 					KeyModifiers keyModifiers = ((IKeyBinding) focusedBinding).amecs$getKeyModifiers();
-					keyModifiers.set(KeyModifier.fromKeyCode(((IKeyBinding) focusedBinding).amecs$getKeyCode().getCode()), true);
+					keyModifiers.set(KeyModifier.fromKey(((IKeyBinding) focusedBinding).amecs$getBoundKey()), true);
 				}
 				client.options.setKeyCode(focusedBinding, keyCode);
 				KeyBinding.updateKeysByCode();

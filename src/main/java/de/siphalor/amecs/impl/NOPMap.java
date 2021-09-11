@@ -1,0 +1,159 @@
+package de.siphalor.amecs.impl;
+
+import java.io.Serializable;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
+/**
+ * Similar to Collections.EmptyMap
+ * @serial include
+ */
+public class NOPMap<K, V> implements Map<K,V>, Serializable {
+	private static final long serialVersionUID = -5357463983776463053L;
+	
+	@SuppressWarnings("rawtypes")
+	public static final Map NOP_MAP = new NOPMap<>();
+
+	@SuppressWarnings("unchecked")
+	public static <K,V> Map<K,V> nopMap() {
+		return NOP_MAP;
+	}
+	
+	private NOPMap() {
+		
+	}
+	
+	public int size() {
+		return 0;
+	}
+
+	public boolean isEmpty() {
+		return true;
+	}
+
+	public boolean containsKey(Object key) {
+		return false;
+	}
+
+	public boolean containsValue(Object value) {
+		return false;
+	}
+
+	public V get(Object key) {
+		return null;
+	}
+
+	public Set<K> keySet() {
+		return Collections.emptySet();
+	}
+
+	public Collection<V> values() {
+		return Collections.emptySet();
+	}
+
+	public Set<Map.Entry<K, V>> entrySet() {
+		return Collections.emptySet();
+	}
+
+	public boolean equals(Object o) {
+		return (o instanceof Map) && ((Map<?, ?>) o).isEmpty();
+	}
+
+	public int hashCode() {
+		return 0;
+	}
+
+	// Override default methods in Map
+	@Override
+	@SuppressWarnings("unchecked")
+	public V getOrDefault(Object k, V defaultValue) {
+		return defaultValue;
+	}
+
+	@Override
+	public void forEach(BiConsumer<? super K, ? super V> action) {
+		Objects.requireNonNull(action);
+	}
+
+	@Override
+	public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+		Objects.requireNonNull(function);
+	}
+
+	@Override
+	public V putIfAbsent(K key, V value) {
+		//nop
+		return null;
+	}
+
+	@Override
+	public boolean remove(Object key, Object value) {
+		//nop
+		return false;
+	}
+
+	@Override
+	public boolean replace(K key, V oldValue, V newValue) {
+		//nop
+		return false;
+	}
+
+	@Override
+	public V replace(K key, V value) {
+		//nop
+		return null;
+	}
+
+	@Override
+	public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+		//nop
+		return null;
+	}
+
+	@Override
+	public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+		//nop
+		return null;
+	}
+
+	@Override
+	public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+		//nop
+		return null;
+	}
+
+	@Override
+	public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+		//nop
+		return null;
+	}
+
+	// Preserves singleton property
+	private Object readResolve() {
+		return NOP_MAP;
+	}
+
+	@Override
+	public V put(K key, V value) {
+		//nop
+		return null;
+	}
+
+	@Override
+	public V remove(Object key) {
+		//nop
+		return null;
+	}
+
+	@Override
+	public void putAll(Map<? extends K, ? extends V> m) {
+		//nop
+	}
+
+	@Override
+	public void clear() {
+		//nop
+	}
+}

@@ -40,6 +40,7 @@ public class ModifierPrefixTextProvider {
 		NORMAL("");
 
 		public static final Variation WIDEST = NORMAL;
+		public static final Variation SMALLEST = COMPRESSED;
 
 		public final String translateKeySuffix;
 
@@ -51,12 +52,16 @@ public class ModifierPrefixTextProvider {
 			return new TranslatableText(translationKey + translateKeySuffix);
 		}
 		
-		public Variation getSmaller(int amount) {
-			return Variation.values()[Math.max(this.ordinal() - amount, 0)];
+		public Variation getNextVariation(int amount) {
+			int targetOrdinal = this.ordinal() + amount;
+			if(targetOrdinal < 0 || targetOrdinal >= Variation.values().length) {
+				return null;
+			}
+			return Variation.values()[targetOrdinal];
 		}
 		
 		public Variation getSmaller() {
-			return getSmaller(1);
+			return getNextVariation(-1);
 		}
 	}
 }

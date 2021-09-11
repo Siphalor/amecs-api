@@ -22,9 +22,21 @@ public class KeyBindingManager {
 	//rather than streaming all and throwing out a bunch every time
 	public static Map<InputUtil.Key, List<KeyBinding>> keysById = new HashMap<>();
 	public static Map<InputUtil.Key, List<KeyBinding>> keysById_priority = new HashMap<>();
-
+	
+	private static void removeKeyBindingFromListFromMap(Map<InputUtil.Key, List<KeyBinding>> keysById_map, KeyBinding keyBinding) {
+		//we need to get the backing list to remove elements thus we can not use any of the other methods that return streams
+		InputUtil.Key keyCode = ((IKeyBinding) keyBinding).amecs$getBoundKey();
+		List<KeyBinding> keyBindings = keysById_map.get(keyCode);
+		if(keyBindings == null) {
+			return;
+		}
+		//while loop to ensure that we remove all equal KeyBindings if for some reason there should be duplicates
+		while(keyBindings.remove(keyBinding)) {
+		}
+	}
+	
 	private static List<KeyBinding> addKeyBindingToListFromMap(Map<InputUtil.Key, List<KeyBinding>> keysById_map, KeyBinding keyBinding) {
-		InputUtil.Key keyCode = ((IKeyBinding) keyBinding).amecs$getKeyCode();
+		InputUtil.Key keyCode = ((IKeyBinding) keyBinding).amecs$getBoundKey();
 		List<KeyBinding> keyBindings = keysById_map.get(keyCode);
 		if (keyBindings == null) {
 			keyBindings = new ArrayList<>();
@@ -86,10 +98,21 @@ public class KeyBindingManager {
 	public static void updatePressedStates() {
 		long windowHandle = MinecraftClient.getInstance().getWindow().getHandle();
 		forEachKeyBinding(keyBinding -> {
-			InputUtil.Key key = ((IKeyBinding) keyBinding).amecs$getKeyCode();
+			InputUtil.Key key = ((IKeyBinding) keyBinding).amecs$getBoundKey();
 			boolean pressed = !keyBinding.isUnbound() && key.getCategory() == InputUtil.Type.KEYSYM && InputUtil.isKeyPressed(windowHandle, key.getCode());
 			keyBinding.setPressed(pressed);
 		});
+	}
+
+	public static void unregister(KeyBinding keyBinding) {
+		if(keyBinding == null) {
+			return;
+		}
+		//do not rebuild the entrie map if we do not have to
+		// KeyBinding.updateKeysByCode();
+		//instead
+		removeKeyBindingFromListFromMap(keysById, keyBinding);
+		removeKeyBindingFromListFromMap(keysById_priority, keyBinding);
 	}
 
 	public static void updateKeysByCode() {
@@ -99,7 +122,7 @@ public class KeyBindingManager {
 	}
 
 	public static void unpressAll() {
-		KeyBindingUtils.getIdToKeyBindingMap().values().forEach(keyBinding -> keyBinding.setPressed(false));
+		KeyBindingUtils.getIdToKeyBindingMap().values().forEach(keyBinding -> ((IKeyBinding) keyBinding).amecs$reset());
 	}
 
 	public static boolean onKeyPressedPriority(InputUtil.Key keyCode) {

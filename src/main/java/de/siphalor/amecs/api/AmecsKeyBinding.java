@@ -41,6 +41,9 @@ public class AmecsKeyBinding extends KeyBinding {
 	 */
 	public AmecsKeyBinding(String id, InputUtil.Type type, int code, String category, KeyModifiers defaultModifiers) {
 		super(id, type, code, category);
+		if(defaultModifiers == null || defaultModifiers == KeyModifiers.NO_MODIFIERS) {
+			defaultModifiers = new KeyModifiers(); //the modifiable version of: KeyModifiers.NO_MODIFIERS
+		}
 		this.defaultModifiers = defaultModifiers;
 		((IKeyBinding) this).amecs$getKeyModifiers().copyModifiers(this.defaultModifiers);
 	}
