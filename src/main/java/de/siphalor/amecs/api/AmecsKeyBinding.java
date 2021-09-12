@@ -16,7 +16,8 @@ public class AmecsKeyBinding extends KeyBinding {
 
 	//for backward compatibility
 	/**
-	 * Constructs a new amecs keybinding
+	 * Constructs a new amecs keybinding. And because how the vanilla key binding works. It is automatically registered.
+	 * <br> See {@link KeyBindingUtils#unregisterKeyBinding(KeyBinding)} for how to unregister it
 	 *
 	 * @param id               the id to use
 	 * @param type             the input type which triggers this keybinding
@@ -31,7 +32,8 @@ public class AmecsKeyBinding extends KeyBinding {
 
 	//why limit the caller with the predefined id pattern with the id for the key but not the category? Just let caller do what he wants to do
 	/**
-	 * Constructs a new amecs keybinding
+	 * Constructs a new amecs keybinding. And because how the vanilla key binding works. It is automatically registered.
+	 * <br> See {@link KeyBindingUtils#unregisterKeyBinding(KeyBinding)} for how to unregister it
 	 *
 	 * @param id               the id to use
 	 * @param type             the input type which triggers this keybinding

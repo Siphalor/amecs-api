@@ -41,7 +41,7 @@ public class MixinMouse {
 		if (client.currentScreen instanceof ControlsOptionsScreen) {
 			KeyBinding focusedBinding = ((ControlsOptionsScreen) client.currentScreen).focusedBinding;
 			if (focusedBinding != null) {
-				if (!((IKeyBinding) focusedBinding).amecs$getBoundKey().equals(InputUtil.UNKNOWN_KEY)) {
+				if (!focusedBinding.isUnbound()) {
 					KeyModifiers keyModifiers = ((IKeyBinding) focusedBinding).amecs$getKeyModifiers();
 					keyModifiers.set(KeyModifier.fromKey(((IKeyBinding) focusedBinding).amecs$getBoundKey()), true);
 				}
