@@ -1,11 +1,13 @@
 package de.siphalor.amecs.impl;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
+import org.lwjgl.glfw.GLFW;
 
 import de.siphalor.amecs.api.KeyBindingUtils;
 import de.siphalor.amecs.api.KeyModifiers;
@@ -42,15 +44,22 @@ public class AmecsAPI implements ClientModInitializer {
 	public static HotbarScrollKeyBinding KEYBINDING_SCROLL_UP;
 	public static HotbarScrollKeyBinding KEYBINDING_SCROLL_DOWN;
 
+	public static DropEntireStackKeyBinding KEYBINDING_DROP_STACK;
+
 	// is called in MixinGameOptions.load
 	public static void registerHiddenScrollKeyBindings() {
 		InputHandlerManager.registerInputEventHandler(KEYBINDING_SCROLL_UP);
 		InputHandlerManager.registerInputEventHandler(KEYBINDING_SCROLL_DOWN);
+
+		// we intentionally do not register the drop stack keybinding here because it is called from MixinMinecraftClient
+		// InputHandlerManager.registerInputEventHandler(KEYBINDING_DROP_STACK);
 	}
 
-	private static void createScrollKeyBindings() {
+	private static void createKeyBindings() {
 		KEYBINDING_SCROLL_UP = new HotbarScrollKeyBinding(makeKeyID("hotbar.scroll.up"), InputUtil.Type.MOUSE, KeyBindingUtils.MOUSE_SCROLL_UP, INVENTORY_CATEGORY, new KeyModifiers(), true);
 		KEYBINDING_SCROLL_DOWN = new HotbarScrollKeyBinding(makeKeyID("hotbar.scroll.down"), InputUtil.Type.MOUSE, KeyBindingUtils.MOUSE_SCROLL_DOWN, INVENTORY_CATEGORY, new KeyModifiers(), false);
+
+		KEYBINDING_DROP_STACK = new DropEntireStackKeyBinding(makeKeyID("drop.stack"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_Q, INVENTORY_CATEGORY, new KeyModifiers().setControl(true));
 	}
 
 	@Override
@@ -66,9 +75,9 @@ public class AmecsAPI implements ClientModInitializer {
 			AmecsAPI.log(Level.WARN, "Minecraft version is no SemVer. This will cause problems!");
 		}
 
-		createScrollKeyBindings();
+		VersionedLogicMethodHelper.initLogicMethodsForClasses(Arrays.asList(HotbarScrollKeyBinding.class, DropEntireStackKeyBinding.class));
 
-		HotbarScrollKeyBinding.initLogicMethod();
+		createKeyBindings();
 	}
 
 	public static void log(Level level, String message) {
