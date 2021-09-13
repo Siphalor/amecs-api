@@ -17,7 +17,7 @@ public class KeyBindingUtils {
 	public static final int MOUSE_SCROLL_UP = 512;
 	public static final int MOUSE_SCROLL_DOWN = 513;
 
-	private static float lastScrollAmount = 0.0F;
+	private static double lastScrollAmount = 0;
 	private static Map<String, KeyBinding> idToKeyBindingMap;
 
 	/**
@@ -25,7 +25,7 @@ public class KeyBindingUtils {
 	 *
 	 * @return the value
 	 */
-	public static float getLastScrollAmount() {
+	public static double getLastScrollAmount() {
 		return lastScrollAmount;
 	}
 
@@ -34,7 +34,7 @@ public class KeyBindingUtils {
 	 *
 	 * @param lastScrollAmount the amount
 	 */
-	public static void setLastScrollAmount(float lastScrollAmount) {
+	public static void setLastScrollAmount(double lastScrollAmount) {
 		KeyBindingUtils.lastScrollAmount = lastScrollAmount;
 	}
 

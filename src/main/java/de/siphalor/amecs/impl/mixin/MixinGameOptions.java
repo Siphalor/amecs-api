@@ -54,6 +54,7 @@ public class MixinGameOptions {
 			amecsOptionsFile = new File(MinecraftClient.getInstance().runDirectory, "options." + AmecsAPI.MOD_ID + ".txt");
 		}
 		if (!amecsOptionsFile.exists()) {
+			AmecsAPI.registerHiddenScrollKeyBindings();
 			return;
 		}
 		try (BufferedReader reader = new BufferedReader(new FileReader(amecsOptionsFile))) {
@@ -93,5 +94,6 @@ public class MixinGameOptions {
 			AmecsAPI.log(Level.ERROR, "Failed to load Amecs API options file:");
 			e.printStackTrace();
 		}
+		AmecsAPI.registerHiddenScrollKeyBindings();
 	}
 }

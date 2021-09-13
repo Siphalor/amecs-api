@@ -5,7 +5,8 @@
 	"name": "Amecs API",
 	"description": "The keybinding modifier API of Amecs",
 	"authors": [
-		"Siphalor"
+		"Siphalor",
+		"Klotzi111"
 	],
 	"contributors": [],
 	"contact": {},
@@ -14,7 +15,9 @@
 	"environment": "client",
 	"entrypoints": {
 		"main": [],
-		"client": [],
+		"client": [
+			"de.siphalor.amecs.impl.AmecsAPI"
+		],
 		"server": []
 	},
 	"accessWidener": "amecsapi.accesswidener",

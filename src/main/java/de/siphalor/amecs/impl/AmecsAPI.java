@@ -1,17 +1,27 @@
 package de.siphalor.amecs.impl;
 
+import java.util.Optional;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
+import de.siphalor.amecs.api.KeyBindingUtils;
 import de.siphalor.amecs.api.KeyModifiers;
+import de.siphalor.amecs.api.input.InputHandlerManager;
+import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.SemanticVersion;
+import net.fabricmc.loader.api.Version;
+import net.minecraft.client.util.InputUtil;
 
 @Environment(EnvType.CLIENT)
 @ApiStatus.Internal
-public class AmecsAPI {
+public class AmecsAPI implements ClientModInitializer {
 
 	public static Logger LOGGER = LogManager.getLogger();
 
@@ -20,7 +30,49 @@ public class AmecsAPI {
 
 	public static final KeyModifiers CURRENT_MODIFIERS = new KeyModifiers();
 
+	public static Version MINECRAFT_VERSION = null;
+	public static SemanticVersion SEMANTIC_MINECRAFT_VERSION = null;
+
+	private static final String INVENTORY_CATEGORY = "key.categories.inventory";
+
+	public static String makeKeyID(String keyName) {
+		return "key." + MOD_ID + "." + keyName;
+	}
+
+	public static HotbarScrollKeyBinding KEYBINDING_SCROLL_UP;
+	public static HotbarScrollKeyBinding KEYBINDING_SCROLL_DOWN;
+
+	// is called in MixinGameOptions.load
+	public static void registerHiddenScrollKeyBindings() {
+		InputHandlerManager.registerInputEventHandler(KEYBINDING_SCROLL_UP);
+		InputHandlerManager.registerInputEventHandler(KEYBINDING_SCROLL_DOWN);
+	}
+
+	private static void createScrollKeyBindings() {
+		KEYBINDING_SCROLL_UP = new HotbarScrollKeyBinding(makeKeyID("hotbar.scroll.up"), InputUtil.Type.MOUSE, KeyBindingUtils.MOUSE_SCROLL_UP, INVENTORY_CATEGORY, new KeyModifiers(), true);
+		KEYBINDING_SCROLL_DOWN = new HotbarScrollKeyBinding(makeKeyID("hotbar.scroll.down"), InputUtil.Type.MOUSE, KeyBindingUtils.MOUSE_SCROLL_DOWN, INVENTORY_CATEGORY, new KeyModifiers(), false);
+	}
+
+	@Override
+	public void onInitializeClient() {
+		Optional<ModContainer> minecraftModContainer = FabricLoader.getInstance().getModContainer("minecraft");
+		if (!minecraftModContainer.isPresent()) {
+			throw new IllegalStateException("Minecraft not available?!?");
+		}
+		MINECRAFT_VERSION = minecraftModContainer.get().getMetadata().getVersion();
+		if (MINECRAFT_VERSION instanceof SemanticVersion) {
+			SEMANTIC_MINECRAFT_VERSION = (SemanticVersion) MINECRAFT_VERSION;
+		} else {
+			AmecsAPI.log(Level.WARN, "Minecraft version is no SemVer. This will cause problems!");
+		}
+
+		createScrollKeyBindings();
+
+		HotbarScrollKeyBinding.initLogicMethod();
+	}
+
 	public static void log(Level level, String message) {
 		LOGGER.log(level, "[" + MOD_NAME + "] " + message);
 	}
+
 }
