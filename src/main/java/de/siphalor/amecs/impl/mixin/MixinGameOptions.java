@@ -77,10 +77,10 @@ public class MixinGameOptions {
 						AmecsAPI.log(Level.WARN, "Unknown keybinding identifier in Amecs API options file: " + id);
 						continue;
 					}
-					
+
 					KeyModifiers modifiers = new KeyModifiers(KeyModifiers.deserializeValue(line.substring(colon + 1)));
-					if(keyBinding.isUnbound()) {
-						if(!modifiers.isUnset()) {
+					if (keyBinding.isUnbound()) {
+						if (!modifiers.isUnset()) {
 							AmecsAPI.log(Level.WARN, "Found modifiers for unbound keybinding in Amecs API options file. Ignoring them: " + id);
 						}
 						continue;

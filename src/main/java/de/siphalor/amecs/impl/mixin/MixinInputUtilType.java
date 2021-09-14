@@ -11,8 +11,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.util.InputUtil;
 
-@Mixin(InputUtil.Type.class)
 @Environment(EnvType.CLIENT)
+@Mixin(InputUtil.Type.class)
 public abstract class MixinInputUtilType {
 	@SuppressWarnings("UnresolvedMixinReference")
 	@Inject(method = "<clinit>", at = @At("RETURN"))

@@ -20,28 +20,32 @@ import net.minecraft.client.util.InputUtil;
 @Environment(EnvType.CLIENT)
 public class KeyModifiers {
 	/**
-	 * This field is for comparison ONLY. <p>
-	 * Trying to change the modifiers of it will fail with an UnsupportedOperationException
+	 * This field is for comparison ONLY.
+	 * <p>
+	 * Trying to change the modifiers of it will fail with an {@link UnsupportedOperationException}
 	 */
-	public static final KeyModifiers NO_MODIFIERS = new KeyModifiersNONE();
-	
-	private static class KeyModifiersNONE extends KeyModifiers {
+	public static final KeyModifiers NO_MODIFIERS = new FinalKeyModifiers();
+
+	private static class FinalKeyModifiers extends KeyModifiers {
 		private static final String EXCEPTION_MESSAGE = "You must not alter this Modifiers object";
+
 		@Override
 		public KeyModifiers setValue(boolean[] value) {
 			throw new UnsupportedOperationException(EXCEPTION_MESSAGE);
 		}
+
 		@Override
 		public void set(KeyModifier keyModifier, boolean value) {
 			throw new UnsupportedOperationException(EXCEPTION_MESSAGE);
 		}
+
 		@Override
 		public void unset() {
 			throw new UnsupportedOperationException(EXCEPTION_MESSAGE);
 		}
 	}
-	
-	//using a boolean array here because it is faster and needs less space
+
+	// using a boolean array here because it is faster and needs less space
 	private final boolean[] value;
 
 	/**
@@ -52,14 +56,16 @@ public class KeyModifiers {
 	}
 
 	/**
-	 * FOR INTERNAL USE ONLY <p>
+	 * FOR INTERNAL USE ONLY
+	 * <p>
 	 * Constructs a new modifier object by a raw {@link BitSet}
 	 *
-	 * @param value the raw value with flags set
+	 * @param value
+	 *            the raw value with flags set
 	 */
 	@ApiStatus.Internal
 	public KeyModifiers(boolean[] value) {
-		if(value.length != KeyModifier.getModifierCount()) {
+		if (value.length != KeyModifier.getModifierCount()) {
 			throw new IllegalArgumentException("value.length != KeyModifier.getModifierCount(): " + KeyModifier.getModifierCount());
 		}
 		this.value = value;
@@ -68,9 +74,12 @@ public class KeyModifiers {
 	/**
 	 * Constructs a new modifier object by all modifier bits
 	 *
-	 * @param alt     sets whether the alt flag should be set
-	 * @param control sets whether the control flag should be set
-	 * @param shift   sets whether the shift flag should be set
+	 * @param alt
+	 *            sets whether the alt flag should be set
+	 * @param control
+	 *            sets whether the control flag should be set
+	 * @param shift
+	 *            sets whether the shift flag should be set
 	 */
 	public KeyModifiers(boolean alt, boolean control, boolean shift) {
 		this();
@@ -89,15 +98,17 @@ public class KeyModifiers {
 	}
 
 	/**
-	 * FOR INTERNAL USE ONLY <p>
+	 * FOR INTERNAL USE ONLY
+	 * <p>
 	 * Sets the raw value
 	 *
-	 * @param value the value with flags set
+	 * @param value
+	 *            the value with flags set
 	 */
 	@ApiStatus.Internal
 	public KeyModifiers setValue(boolean[] value) {
 		int length = this.value.length;
-		if(value.length != length) {
+		if (value.length != length) {
 			throw new IllegalArgumentException("value != this.value.length: " + length);
 		}
 		System.arraycopy(value, 0, this.value, 0, length);
@@ -105,7 +116,8 @@ public class KeyModifiers {
 	}
 
 	/**
-	 * FOR INTERNAL USE ONLY <p>
+	 * FOR INTERNAL USE ONLY
+	 * <p>
 	 * Gets the raw value
 	 *
 	 * @return the value with all flags set
@@ -116,7 +128,8 @@ public class KeyModifiers {
 	}
 
 	/**
-	 * FOR INTERNAL USE ONLY <p>
+	 * FOR INTERNAL USE ONLY
+	 * <p>
 	 * copies the modifiers of the other KeyModifiers object into this
 	 */
 	@ApiStatus.Internal
@@ -127,7 +140,8 @@ public class KeyModifiers {
 	/**
 	 * Sets the alt flag
 	 *
-	 * @param value whether the alt flag should be activated or not
+	 * @param value
+	 *            whether the alt flag should be activated or not
 	 */
 	public KeyModifiers setAlt(boolean value) {
 		set(KeyModifier.ALT, value);
@@ -146,7 +160,8 @@ public class KeyModifiers {
 	/**
 	 * Sets the control flag
 	 *
-	 * @param value whether the control flag should be activated or not
+	 * @param value
+	 *            whether the control flag should be activated or not
 	 */
 	public KeyModifiers setControl(boolean value) {
 		set(KeyModifier.CONTROL, value);
@@ -165,7 +180,8 @@ public class KeyModifiers {
 	/**
 	 * Sets the shift flag
 	 *
-	 * @param value whether the shift flag should be activated or not
+	 * @param value
+	 *            whether the shift flag should be activated or not
 	 */
 	public KeyModifiers setShift(boolean value) {
 		set(KeyModifier.SHIFT, value);
@@ -182,14 +198,16 @@ public class KeyModifiers {
 	}
 
 	public void set(KeyModifier keyModifier, boolean value) {
-		if (keyModifier != KeyModifier.NONE)
+		if (keyModifier != KeyModifier.NONE) {
 			this.value[keyModifier.id] = value;
+		}
 	}
 
 	public boolean get(KeyModifier keyModifier) {
-		if (keyModifier == KeyModifier.NONE)
+		if (keyModifier == KeyModifier.NONE) {
 			return true;
-		return this.value[keyModifier.id];
+		}
+		return value[keyModifier.id];
 	}
 
 	/**
@@ -211,7 +229,8 @@ public class KeyModifiers {
 	/**
 	 * Cleans up the flags by the key code present in the given key binding
 	 *
-	 * @param keyBinding the key binding from where to extract the key code
+	 * @param keyBinding
+	 *            the key binding from where to extract the key code
 	 */
 	public void cleanup(KeyBinding keyBinding) {
 		InputUtil.Key key = ((IKeyBinding) keyBinding).amecs$getBoundKey();
@@ -221,7 +240,8 @@ public class KeyModifiers {
 	/**
 	 * Returns whether this object equals another one
 	 *
-	 * @param other another modifier object
+	 * @param other
+	 *            another modifier object
 	 * @return whether both values are equal
 	 */
 	public boolean equals(KeyModifiers other) {
@@ -233,38 +253,43 @@ public class KeyModifiers {
 		return "KeyModifiers [alt=" + getAlt() + ", control=" + getControl() + ", shift=" + getShift() + "]";
 	}
 
-	//new format even if it needs more characters because it is more user friendly (and simpler to parse). No everyone knows about bit masks
-	//it could be discussed whether this new is really "better" but i leave it for now. It is backward compatible so nothing breaks
+	// new format even if it needs more characters because it is more user friendly (and simpler to parse). Not everyone knows about bit masks
+	// it could be discussed whether this new is really "better" but i leave it for now. It is backward compatible so nothing breaks
 	/**
-	 * FOR INTERNAL USE ONLY <p>
+	 * FOR INTERNAL USE ONLY
+	 *
+	 * @return the serialized string representation of the modifiers
 	 */
 	@ApiStatus.Internal
 	public String serializeValue() {
 		StringBuilder sb = new StringBuilder();
-		for(boolean b : value) {
+		for (boolean b : value) {
 			sb.append(b ? 1 : 0);
 			sb.append(",");
 		}
-		//remove trailing comma
-		//this will fail if value.length is 0. But that would be useless anyways
+		// remove trailing comma
+		// this will fail if value.length is 0. But that would be useless anyways
 		sb.setLength(sb.length() - ",".length());
 		return sb.toString();
 	}
 
 	/**
-	 * FOR INTERNAL USE ONLY <p>
+	 * FOR INTERNAL USE ONLY
+	 *
+	 * @return the deserialized modifier array
 	 */
 	@ApiStatus.Internal
 	public static boolean[] deserializeValue(String value) {
 		boolean[] ret = new boolean[KeyModifier.getModifierCount()];
-		if (value.isEmpty())
+		if (value.isEmpty()) {
 			return ret;
-		//backward compatibility for old format
-		if(!value.contains(",")) {
-			//we never had more than one value with the fat long
+		}
+		// backward compatibility for old format
+		if (!value.contains(",")) {
+			// we never had more than one value with the fat long
 			long packedModifiers = Long.parseLong(value, 16);
-			for(KeyModifier keyModifier : KeyModifier.VALUES) {
-				if(keyModifier == KeyModifier.NONE) {
+			for (KeyModifier keyModifier : KeyModifier.VALUES) {
+				if (keyModifier == KeyModifier.NONE) {
 					continue;
 				}
 				long mask = (1 << keyModifier.id);
@@ -272,9 +297,9 @@ public class KeyModifiers {
 			}
 			return ret;
 		}
-		//we have the new format
+		// we have the new format
 		int i = 0;
-		for(String p : value.split(",")) {
+		for (String p : value.split(",")) {
 			ret[i++] = p.equals("1");
 		}
 		return ret;

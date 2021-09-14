@@ -1,11 +1,14 @@
 package de.siphalor.amecs.impl;
 
 import de.siphalor.amecs.api.KeyModifier;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
+@Environment(EnvType.CLIENT)
 public class ModifierPrefixTextProvider {
 	private static final Text SUFFIX = new LiteralText(" + ");
 	private static final Text COMPRESSED_SUFFIX = new LiteralText("+");
@@ -39,6 +42,9 @@ public class ModifierPrefixTextProvider {
 		SHORT(".short"),
 		NORMAL("");
 
+		// using this array for the values because it is faster than calling values() every time
+		public static final Variation[] VALUES = Variation.values();
+
 		public static final Variation WIDEST = NORMAL;
 		public static final Variation SMALLEST = COMPRESSED;
 
@@ -47,19 +53,19 @@ public class ModifierPrefixTextProvider {
 		private Variation(String translateKeySuffix) {
 			this.translateKeySuffix = translateKeySuffix;
 		}
-		
+
 		public TranslatableText getTranslatableText(String translationKey) {
 			return new TranslatableText(translationKey + translateKeySuffix);
 		}
-		
+
 		public Variation getNextVariation(int amount) {
-			int targetOrdinal = this.ordinal() + amount;
-			if(targetOrdinal < 0 || targetOrdinal >= Variation.values().length) {
+			int targetOrdinal = ordinal() + amount;
+			if (targetOrdinal < 0 || targetOrdinal >= VALUES.length) {
 				return null;
 			}
-			return Variation.values()[targetOrdinal];
+			return VALUES[targetOrdinal];
 		}
-		
+
 		public Variation getSmaller() {
 			return getNextVariation(-1);
 		}

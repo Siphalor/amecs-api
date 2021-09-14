@@ -18,11 +18,11 @@ import net.minecraft.client.util.InputUtil;
 
 @Environment(EnvType.CLIENT)
 public class KeyBindingManager {
-	//split it in two maps because it is ways faster to only stream the map with the objects we need
-	//rather than streaming all and throwing out a bunch every time
+	// split it in two maps because it is ways faster to only stream the map with the objects we need
+	// rather than streaming all and throwing out a bunch every time
 	public static Map<InputUtil.Key, List<KeyBinding>> keysById = new HashMap<>();
 	public static Map<InputUtil.Key, List<KeyBinding>> keysById_priority = new HashMap<>();
-	
+
 	/**
 	 * 
 	 * @param keysById_map
@@ -30,20 +30,20 @@ public class KeyBindingManager {
 	 * @return whether the keyBinding was removed. It is not removed if it was not contained
 	 */
 	private static boolean removeKeyBindingFromListFromMap(Map<InputUtil.Key, List<KeyBinding>> keysById_map, KeyBinding keyBinding) {
-		//we need to get the backing list to remove elements thus we can not use any of the other methods that return streams
+		// we need to get the backing list to remove elements thus we can not use any of the other methods that return streams
 		InputUtil.Key keyCode = ((IKeyBinding) keyBinding).amecs$getBoundKey();
 		List<KeyBinding> keyBindings = keysById_map.get(keyCode);
-		if(keyBindings == null) {
+		if (keyBindings == null) {
 			return false;
 		}
 		boolean removed = false;
-		//while loop to ensure that we remove all equal KeyBindings if for some reason there should be duplicates
-		while(keyBindings.remove(keyBinding)) {
+		// while loop to ensure that we remove all equal KeyBindings if for some reason there should be duplicates
+		while (keyBindings.remove(keyBinding)) {
 			removed = true;
 		}
 		return removed;
 	}
-	
+
 	/**
 	 * 
 	 * @param keysById_map
@@ -57,26 +57,26 @@ public class KeyBindingManager {
 			keyBindings = new ArrayList<>();
 			keysById_map.put(keyCode, keyBindings);
 		}
-		if(keyBindings.contains(keyBinding)) {
+		if (keyBindings.contains(keyBinding)) {
 			return false;
 		}
 		keyBindings.add(keyBinding);
 		return true;
 	}
-	
+
 	/**
 	 * 
 	 * @param keyBinding
 	 * @return whether the keyBinding was added. It is not added if it is already contained
 	 */
 	public static boolean register(KeyBinding keyBinding) {
-		if(keyBinding instanceof PriorityKeyBinding) {
+		if (keyBinding instanceof PriorityKeyBinding) {
 			return addKeyBindingToListFromMap(keysById_priority, keyBinding);
 		} else {
 			return addKeyBindingToListFromMap(keysById, keyBinding);
 		}
 	}
-	
+
 	public static Stream<KeyBinding> getMatchingKeyBindings(InputUtil.Key keyCode, boolean priority) {
 		List<KeyBinding> keyBindingList = (priority ? keysById_priority : keysById).get(keyCode);
 		if (keyBindingList == null)
@@ -106,17 +106,17 @@ public class KeyBindingManager {
 	private static Stream<KeyBinding> getKeyBindingsFromMap(Map<InputUtil.Key, List<KeyBinding>> keysById_map) {
 		return keysById_map.values().stream().flatMap(Collection::stream);
 	}
-	
+
 	private static void forEachKeyBinding(Consumer<KeyBinding> consumer) {
 		getKeyBindingsFromMap(keysById_priority).forEach(consumer);
 		getKeyBindingsFromMap(keysById).forEach(consumer);
 	}
-	
+
 	private static void forEachKeyBindingWithKey(InputUtil.Key key, Consumer<KeyBinding> consumer) {
 		getMatchingKeyBindings(key, true).forEach(consumer);
 		getMatchingKeyBindings(key, false).forEach(consumer);
 	}
-	
+
 	public static void updatePressedStates() {
 		long windowHandle = MinecraftClient.getInstance().getWindow().getHandle();
 		forEachKeyBinding(keyBinding -> {
@@ -132,12 +132,12 @@ public class KeyBindingManager {
 	 * @return whether the keyBinding was removed. It is not removed if it was not contained
 	 */
 	public static boolean unregister(KeyBinding keyBinding) {
-		if(keyBinding == null) {
+		if (keyBinding == null) {
 			return false;
 		}
-		//do not rebuild the entrie map if we do not have to
+		// do not rebuild the entrie map if we do not have to
 		// KeyBinding.updateKeysByCode();
-		//instead
+		// instead
 		boolean removed = false;
 		removed |= removeKeyBindingFromListFromMap(keysById, keyBinding);
 		removed |= removeKeyBindingFromListFromMap(keysById_priority, keyBinding);
@@ -155,8 +155,8 @@ public class KeyBindingManager {
 	}
 
 	public static boolean onKeyPressedPriority(InputUtil.Key keyCode) {
-		//because streams do evaluation lazy this code does only call onPressedPriority on so many keyBinding until one returns true
-		//Or if no one returns true all are called and an empty optional is returned
+		// because streams do evaluation lazy this code does only call onPressedPriority on so many keyBinding until one returns true
+		// Or if no one returns true all are called and an empty optional is returned
 		Optional<KeyBinding> keyBindings = getMatchingKeyBindings(keyCode, true).filter(keyBinding -> ((PriorityKeyBinding) keyBinding).onPressedPriority()).findFirst();
 		return keyBindings.isPresent();
 	}

@@ -11,9 +11,12 @@ import java.util.TreeMap;
 
 import org.apache.logging.log4j.Level;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.VersionParsingException;
 
+@Environment(EnvType.CLIENT)
 public class VersionedLogicMethodHelper {
 
 	public static void initLogicMethodsForClasses(List<Class<?>> classes) {

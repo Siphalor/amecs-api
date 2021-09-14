@@ -30,10 +30,10 @@ public class AmecsAPI implements ClientModInitializer {
 	public static final String MOD_ID = "amecsapi";
 	public static final String MOD_NAME = "Amecs API";
 
-	public static final KeyModifiers CURRENT_MODIFIERS = new KeyModifiers();
-
 	public static Version MINECRAFT_VERSION = null;
 	public static SemanticVersion SEMANTIC_MINECRAFT_VERSION = null;
+
+	public static final KeyModifiers CURRENT_MODIFIERS = new KeyModifiers();
 
 	private static final String INVENTORY_CATEGORY = "key.categories.inventory";
 
@@ -62,8 +62,7 @@ public class AmecsAPI implements ClientModInitializer {
 		KEYBINDING_DROP_STACK = new DropEntireStackKeyBinding(makeKeyID("drop.stack"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_Q, INVENTORY_CATEGORY, new KeyModifiers().setControl(true));
 	}
 
-	@Override
-	public void onInitializeClient() {
+	private static void getMinecraftVersion() {
 		Optional<ModContainer> minecraftModContainer = FabricLoader.getInstance().getModContainer("minecraft");
 		if (!minecraftModContainer.isPresent()) {
 			throw new IllegalStateException("Minecraft not available?!?");
@@ -74,6 +73,11 @@ public class AmecsAPI implements ClientModInitializer {
 		} else {
 			AmecsAPI.log(Level.WARN, "Minecraft version is no SemVer. This will cause problems!");
 		}
+	}
+
+	@Override
+	public void onInitializeClient() {
+		getMinecraftVersion();
 
 		VersionedLogicMethodHelper.initLogicMethodsForClasses(Arrays.asList(HotbarScrollKeyBinding.class, DropEntireStackKeyBinding.class));
 

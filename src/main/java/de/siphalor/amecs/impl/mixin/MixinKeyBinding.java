@@ -68,11 +68,11 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 	public void amecs$incrementTimesPressed() {
 		timesPressed++;
 	}
-	
+
 	@Invoker("reset")
 	@Override
 	public abstract void amecs$reset();
-	
+
 	@Override
 	public KeyModifiers amecs$getKeyModifiers() {
 		return keyModifiers;
@@ -91,12 +91,12 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 		ModifierPrefixTextProvider.Variation variation = ModifierPrefixTextProvider.Variation.WIDEST;
 		do {
 			fullName = name;
-			for(KeyModifier keyModifier : KeyModifier.VALUES) {
-				if(keyModifier == KeyModifier.NONE) {
+			for (KeyModifier keyModifier : KeyModifier.VALUES) {
+				if (keyModifier == KeyModifier.NONE) {
 					continue;
 				}
-				
-				if(keyModifiers.get(keyModifier)) {
+
+				if (keyModifiers.get(keyModifier)) {
 					fullName = keyModifier.textProvider.getText(variation).append(fullName);
 				}
 			}
@@ -107,17 +107,23 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 
 	@Inject(method = "matchesKey", at = @At("RETURN"), cancellable = true)
 	public void matchesKey(int keyCode, int scanCode, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-		if(!keyModifiers.isUnset() && !keyModifiers.isPressed()) callbackInfoReturnable.setReturnValue(false);
+		if (!keyModifiers.isUnset() && !keyModifiers.isPressed()) {
+			callbackInfoReturnable.setReturnValue(false);
+		}
 	}
 
 	@Inject(method = "matchesMouse", at = @At("RETURN"), cancellable = true)
 	public void matchesMouse(int mouse, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-        if(!keyModifiers.isUnset() && !keyModifiers.isPressed()) callbackInfoReturnable.setReturnValue(false);
+		if (!keyModifiers.isUnset() && !keyModifiers.isPressed()) {
+			callbackInfoReturnable.setReturnValue(false);
+		}
 	}
 
 	@Inject(method = "equals", at = @At("RETURN"), cancellable = true)
 	public void equals(KeyBinding other, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-		if (!keyModifiers.equals(((IKeyBinding) other).amecs$getKeyModifiers())) callbackInfoReturnable.setReturnValue(false);
+		if (!keyModifiers.equals(((IKeyBinding) other).amecs$getKeyModifiers())) {
+			callbackInfoReturnable.setReturnValue(false);
+		}
 	}
 
 	@Inject(method = "onKeyPressed", at = @At("HEAD"), cancellable = true)
@@ -152,7 +158,6 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 
 	@Inject(method = "isDefault", at = @At("HEAD"), cancellable = true)
 	public void isDefault(CallbackInfoReturnable<Boolean> cir) {
-		//noinspection ConstantConditions
 		if (!((Object) this instanceof AmecsKeyBinding)) {
 			if (!keyModifiers.isUnset()) {
 				cir.setReturnValue(false);

@@ -3,11 +3,14 @@ package de.siphalor.amecs.impl;
 import de.siphalor.amecs.api.AmecsKeyBinding;
 import de.siphalor.amecs.api.KeyModifiers;
 import de.siphalor.amecs.impl.VersionedLogicMethodHelper.ReflectionExceptionProxiedMethod;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Hand;
 
+@Environment(EnvType.CLIENT)
 public class DropEntireStackKeyBinding extends AmecsKeyBinding implements DropItemStackTriggerListener {
 	@SuppressWarnings("unused") // used via reflection
 	private static final String Method_dropEntireStackLogic_PREFIX = "dropEntireStackLogic$";

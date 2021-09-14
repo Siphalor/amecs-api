@@ -9,6 +9,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import de.siphalor.amecs.api.KeyModifier;
 import de.siphalor.amecs.api.KeyModifiers;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.ControlsOptionsScreen;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
@@ -19,6 +21,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 
 @SuppressWarnings("WeakerAccess")
+@Environment(EnvType.CLIENT)
 @Mixin(ControlsOptionsScreen.class)
 public abstract class MixinControlsOptionsScreen extends GameOptionsScreen {
 	@Shadow

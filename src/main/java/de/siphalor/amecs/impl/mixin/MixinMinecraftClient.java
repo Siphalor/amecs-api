@@ -11,9 +11,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import de.siphalor.amecs.api.input.InputHandlerManager;
 import de.siphalor.amecs.impl.AmecsAPI;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 
+@Environment(EnvType.CLIENT)
 @Mixin(value = MinecraftClient.class, priority = 50)
 public abstract class MixinMinecraftClient {
 

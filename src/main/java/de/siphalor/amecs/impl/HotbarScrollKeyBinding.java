@@ -5,10 +5,13 @@ import de.siphalor.amecs.api.KeyModifiers;
 import de.siphalor.amecs.api.input.InputEventHandler;
 import de.siphalor.amecs.impl.VersionedLogicMethodHelper.ReflectionExceptionProxiedMethod;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.math.MathHelper;
 
+@Environment(EnvType.CLIENT)
 public class HotbarScrollKeyBinding extends AmecsKeyBinding implements InputEventHandler {
 	@SuppressWarnings("unused") // used via reflection
 	private static final String Method_scrollLogic_PREFIX = "scrollLogic$";

@@ -32,7 +32,8 @@ public class KeyBindingUtils {
 	/**
 	 * Sets the last (y directional) scroll amount. <b>For internal use only.</b>
 	 *
-	 * @param lastScrollAmount the amount
+	 * @param lastScrollAmount
+	 *            the amount
 	 */
 	public static void setLastScrollAmount(double lastScrollAmount) {
 		KeyBindingUtils.lastScrollAmount = lastScrollAmount;
@@ -46,13 +47,13 @@ public class KeyBindingUtils {
 	public static Map<String, KeyBinding> getIdToKeyBindingMap() {
 		if (idToKeyBindingMap == null) {
 			try {
-				//reflections accessors should be initialized statically if the are static
-				//but in this case its fine because we only do this once because it is cached in a static field
-				
-				//noinspection JavaReflectionMemberAccess
+				// reflections accessors should be initialized statically if the are static
+				// but in this case its fine because we only do this once because it is cached in a static field
+
+				// noinspection JavaReflectionMemberAccess
 				Method method = KeyBinding.class.getDeclaredMethod("amecs$getIdToKeyBindingMap");
 				method.setAccessible(true);
-				//noinspection unchecked
+				// noinspection unchecked
 				idToKeyBindingMap = (Map<String, KeyBinding>) method.invoke(null);
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 				e.printStackTrace();
@@ -62,36 +63,42 @@ public class KeyBindingUtils {
 	}
 
 	/**
-	 * Unregisters a keybinding from input querying but is NOT removed from the controls GUI 
-	 * <br> if you unregister a keybinding which is already in the controls GUI you can call {@link #registerHiddenKeyBinding(KeyBinding)} with this keybinding to undo this
-	 * <p> This is possible even after the game initialized
-	 * 
-	 * @param keyBinding 
+	 * Unregisters a keybinding from input querying but is NOT removed from the controls GUI
+	 * <br>
+	 * if you unregister a keybinding which is already in the controls GUI you can call {@link #registerHiddenKeyBinding(KeyBinding)} with this keybinding to undo this
+	 * <p>
+	 * This is possible even after the game initialized
+	 *
+	 * @param keyBinding
 	 * @return whether the keyBinding was removed. It is not removed if it was not contained
 	 */
 	public static boolean unregisterKeyBinding(KeyBinding keyBinding) {
 		return KeyBindingManager.unregister(keyBinding);
 	}
-	
+
 	/**
 	 * Unregisters a keybinding with the given id
-	 * <br> for more details {@link #unregisterKeyBinding(KeyBinding)}
-	 * 
+	 * <br>
+	 * for more details {@link #unregisterKeyBinding(KeyBinding)}
+	 *
 	 * @see #unregisterKeyBinding(KeyBinding)
-	 * @param id the translation key
+	 * @param id
+	 *            the translation key
 	 * @return whether the keyBinding was removed. It is not removed if it was not contained
 	 */
 	public static boolean unregisterKeyBinding(String id) {
 		KeyBinding keyBinding = getIdToKeyBindingMap().remove(id);
 		return KeyBindingManager.unregister(keyBinding);
 	}
-	
+
 	/**
-	 * Registers a keybinding for input querying but is NOT added to the controls GUI 
-	 * <br> you can register a keybinding which is already in the controls GUI but was removed from input querying via {@link #unregisterKeyBinding(KeyBinding)}
-	 * <p> This is possible even after the game initialized
-	 * 
-	 * @param keyBinding 
+	 * Registers a keybinding for input querying but is NOT added to the controls GUI
+	 * <br>
+	 * you can register a keybinding which is already in the controls GUI but was removed from input querying via {@link #unregisterKeyBinding(KeyBinding)}
+	 * <p>
+	 * This is possible even after the game initialized
+	 *
+	 * @param keyBinding
 	 * @return whether the keyBinding was added. It is not added if it is already contained
 	 */
 	public static boolean registerHiddenKeyBinding(KeyBinding keyBinding) {
