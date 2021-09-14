@@ -32,8 +32,7 @@ public class KeyBindingUtils {
 	/**
 	 * Sets the last (y directional) scroll amount. <b>For internal use only.</b>
 	 *
-	 * @param lastScrollAmount
-	 *            the amount
+	 * @param lastScrollAmount the amount
 	 */
 	public static void setLastScrollAmount(double lastScrollAmount) {
 		KeyBindingUtils.lastScrollAmount = lastScrollAmount;
@@ -66,14 +65,15 @@ public class KeyBindingUtils {
 	 * Unregisters a keybinding from input querying but is NOT removed from the controls GUI
 	 * <br>
 	 * if you unregister a keybinding which is already in the controls GUI you can call {@link #registerHiddenKeyBinding(KeyBinding)} with this keybinding to undo this
-	 * <p>
+	 * <br>
+	 * <br>
 	 * This is possible even after the game initialized
 	 *
 	 * @param keyBinding
 	 * @return whether the keyBinding was removed. It is not removed if it was not contained
 	 */
 	public static boolean unregisterKeyBinding(KeyBinding keyBinding) {
-		return KeyBindingManager.unregister(keyBinding);
+		return unregisterKeyBinding(keyBinding.getTranslationKey());
 	}
 
 	/**
@@ -82,8 +82,7 @@ public class KeyBindingUtils {
 	 * for more details {@link #unregisterKeyBinding(KeyBinding)}
 	 *
 	 * @see #unregisterKeyBinding(KeyBinding)
-	 * @param id
-	 *            the translation key
+	 * @param id the translation key
 	 * @return whether the keyBinding was removed. It is not removed if it was not contained
 	 */
 	public static boolean unregisterKeyBinding(String id) {
@@ -95,7 +94,8 @@ public class KeyBindingUtils {
 	 * Registers a keybinding for input querying but is NOT added to the controls GUI
 	 * <br>
 	 * you can register a keybinding which is already in the controls GUI but was removed from input querying via {@link #unregisterKeyBinding(KeyBinding)}
-	 * <p>
+	 * <br>
+	 * <br>
 	 * This is possible even after the game initialized
 	 *
 	 * @param keyBinding

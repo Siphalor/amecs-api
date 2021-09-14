@@ -61,7 +61,7 @@ public class KeyModifiers {
 	 * Constructs a new modifier object by a raw {@link BitSet}
 	 *
 	 * @param value
-	 *            the raw value with flags set
+	 *        the raw value with flags set
 	 */
 	@ApiStatus.Internal
 	public KeyModifiers(boolean[] value) {
@@ -74,12 +74,9 @@ public class KeyModifiers {
 	/**
 	 * Constructs a new modifier object by all modifier bits
 	 *
-	 * @param alt
-	 *            sets whether the alt flag should be set
-	 * @param control
-	 *            sets whether the control flag should be set
-	 * @param shift
-	 *            sets whether the shift flag should be set
+	 * @param alt sets whether the alt flag should be set
+	 * @param control sets whether the control flag should be set
+	 * @param shift sets whether the shift flag should be set
 	 */
 	public KeyModifiers(boolean alt, boolean control, boolean shift) {
 		this();
@@ -102,8 +99,7 @@ public class KeyModifiers {
 	 * <p>
 	 * Sets the raw value
 	 *
-	 * @param value
-	 *            the value with flags set
+	 * @param value the value with flags set
 	 */
 	@ApiStatus.Internal
 	public KeyModifiers setValue(boolean[] value) {
@@ -140,8 +136,7 @@ public class KeyModifiers {
 	/**
 	 * Sets the alt flag
 	 *
-	 * @param value
-	 *            whether the alt flag should be activated or not
+	 * @param value whether the alt flag should be activated or not
 	 */
 	public KeyModifiers setAlt(boolean value) {
 		set(KeyModifier.ALT, value);
@@ -160,8 +155,7 @@ public class KeyModifiers {
 	/**
 	 * Sets the control flag
 	 *
-	 * @param value
-	 *            whether the control flag should be activated or not
+	 * @param value whether the control flag should be activated or not
 	 */
 	public KeyModifiers setControl(boolean value) {
 		set(KeyModifier.CONTROL, value);
@@ -180,8 +174,7 @@ public class KeyModifiers {
 	/**
 	 * Sets the shift flag
 	 *
-	 * @param value
-	 *            whether the shift flag should be activated or not
+	 * @param value whether the shift flag should be activated or not
 	 */
 	public KeyModifiers setShift(boolean value) {
 		set(KeyModifier.SHIFT, value);
@@ -229,8 +222,7 @@ public class KeyModifiers {
 	/**
 	 * Cleans up the flags by the key code present in the given key binding
 	 *
-	 * @param keyBinding
-	 *            the key binding from where to extract the key code
+	 * @param keyBinding the key binding from where to extract the key code
 	 */
 	public void cleanup(KeyBinding keyBinding) {
 		InputUtil.Key key = ((IKeyBinding) keyBinding).amecs$getBoundKey();
@@ -240,8 +232,7 @@ public class KeyModifiers {
 	/**
 	 * Returns whether this object equals another one
 	 *
-	 * @param other
-	 *            another modifier object
+	 * @param other another modifier object
 	 * @return whether both values are equal
 	 */
 	public boolean equals(KeyModifiers other) {
