@@ -1,11 +1,14 @@
 package de.siphalor.amecs.impl;
 
 import de.siphalor.amecs.api.KeyModifier;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 
+@Environment(EnvType.CLIENT)
 public class ModifierPrefixTextProvider {
 	private static final Text SUFFIX = new LiteralText(" + ");
 	private static final Text COMPRESSED_SUFFIX = new LiteralText("+");
@@ -20,16 +23,7 @@ public class ModifierPrefixTextProvider {
 	}
 
 	protected BaseText getBaseText(Variation variation) {
-		switch (variation) {
-			case NORMAL:
-				return new TranslatableText(translationKey);
-			case SHORT:
-				return new TranslatableText(translationKey + ".short");
-			case COMPRESSED:
-			case TINY:
-				return new TranslatableText(translationKey + ".tiny");
-		}
-		return null; // unreachable
+		return variation.getTranslatableText(translationKey);
 	}
 
 	public BaseText getText(Variation variation) {
@@ -42,15 +36,38 @@ public class ModifierPrefixTextProvider {
 		return text;
 	}
 
-	public enum Variation {
-		COMPRESSED(null), TINY(COMPRESSED), SHORT(TINY), NORMAL(SHORT);
+	public static enum Variation {
+		COMPRESSED(".tiny"),
+		TINY(".tiny"),
+		SHORT(".short"),
+		NORMAL("");
 
-		public static Variation WIDEST = NORMAL;
+		// using this array for the values because it is faster than calling values() every time
+		public static final Variation[] VALUES = Variation.values();
 
-		public final Variation shorter;
+		public static final Variation WIDEST = NORMAL;
+		public static final Variation SMALLEST = COMPRESSED;
 
-		Variation(Variation shorter) {
-			this.shorter = shorter;
+		public final String translateKeySuffix;
+
+		private Variation(String translateKeySuffix) {
+			this.translateKeySuffix = translateKeySuffix;
+		}
+
+		public TranslatableText getTranslatableText(String translationKey) {
+			return new TranslatableText(translationKey + translateKeySuffix);
+		}
+
+		public Variation getNextVariation(int amount) {
+			int targetOrdinal = ordinal() + amount;
+			if (targetOrdinal < 0 || targetOrdinal >= VALUES.length) {
+				return null;
+			}
+			return VALUES[targetOrdinal];
+		}
+
+		public Variation getSmaller() {
+			return getNextVariation(-1);
 		}
 	}
 }

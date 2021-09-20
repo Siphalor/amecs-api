@@ -1,14 +1,7 @@
 package de.siphalor.amecs.impl.mixin;
 
-import de.siphalor.amecs.api.KeyBindingUtils;
-import de.siphalor.amecs.api.KeyModifiers;
-import de.siphalor.amecs.impl.AmecsAPI;
-import de.siphalor.amecs.impl.duck.IKeyBinding;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.GameOptions;
-import net.minecraft.client.option.KeyBinding;
+import java.io.*;
+
 import org.apache.logging.log4j.Level;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,7 +11,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.io.*;
+import de.siphalor.amecs.api.KeyBindingUtils;
+import de.siphalor.amecs.api.KeyModifiers;
+import de.siphalor.amecs.impl.AmecsAPI;
+import de.siphalor.amecs.impl.duck.IKeyBinding;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.GameOptions;
+import net.minecraft.client.option.KeyBinding;
 
 @SuppressWarnings("WeakerAccess")
 @Environment(EnvType.CLIENT)
@@ -39,7 +40,6 @@ public class MixinGameOptions {
 			KeyModifiers modifiers;
 			for (KeyBinding binding : keysAll) {
 				modifiers = ((IKeyBinding) binding).amecs$getKeyModifiers();
-				//noinspection deprecation
 				writer.println(KEY_MODIFIERS_PREFIX + binding.getTranslationKey() + ":" + modifiers.serializeValue());
 			}
 		} catch (FileNotFoundException e) {
@@ -76,8 +76,15 @@ public class MixinGameOptions {
 						AmecsAPI.log(Level.WARN, "Unknown keybinding identifier in Amecs API options file: " + id);
 						continue;
 					}
-					//noinspection deprecation
-					((IKeyBinding) keyBinding).amecs$getKeyModifiers().setValue(KeyModifiers.deserializeValue(line.substring(colon + 1)));
+
+					KeyModifiers modifiers = new KeyModifiers(KeyModifiers.deserializeValue(line.substring(colon + 1)));
+					if (keyBinding.isUnbound()) {
+						if (!modifiers.isUnset()) {
+							AmecsAPI.log(Level.WARN, "Found modifiers for unbound keybinding in Amecs API options file. Ignoring them: " + id);
+						}
+						continue;
+					}
+					((IKeyBinding) keyBinding).amecs$getKeyModifiers().copyModifiers(modifiers);
 				} catch (Throwable e) {
 					AmecsAPI.log(Level.ERROR, "Invalid line in Amecs API options file: " + line);
 				}
