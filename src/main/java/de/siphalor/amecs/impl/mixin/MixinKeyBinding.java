@@ -1,10 +1,23 @@
 package de.siphalor.amecs.impl.mixin;
 
+import java.util.Map;
+
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
 import de.siphalor.amecs.api.AmecsKeyBinding;
+import de.siphalor.amecs.api.KeyModifier;
 import de.siphalor.amecs.api.KeyModifiers;
-import de.siphalor.amecs.impl.AmecsAPI;
 import de.siphalor.amecs.impl.KeyBindingManager;
 import de.siphalor.amecs.impl.ModifierPrefixTextProvider;
+import de.siphalor.amecs.impl.NOPMap;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,17 +26,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import java.util.Map;
 
 @SuppressWarnings("WeakerAccess")
 @Environment(EnvType.CLIENT)
@@ -37,18 +40,19 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 
 	@Shadow
 	@Final
-	private static Map<InputUtil.KeyCode, KeyBinding> keysByCode;
-
-	@Shadow
-	@Final
 	private static Map<String, KeyBinding> keysById;
+
+	// set it to a NOPMap meaning everything done with this map is ignored. Because setting it to null would cause problems
+	// ... even if we remove the put in the KeyBinding constructor. Because maybe in the future this map is used elsewhere or a other mod uses it
+	@Shadow
+	private static Map<InputUtil.KeyCode, KeyBinding> keysByCode = NOPMap.nopMap();
 
 	@Shadow private boolean pressed;
 	@Unique
 	private final KeyModifiers keyModifiers = new KeyModifiers();
 
 	@Override
-	public InputUtil.KeyCode amecs$getKeyCode() {
+	public InputUtil.KeyCode amecs$getBoundKey() {
 		return keyCode;
 	}
 
@@ -63,55 +67,65 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 	}
 
 	@Override
+	public void amecs$incrementTimesPressed() {
+		timesPressed++;
+	}
+
+	@Invoker("reset")
+	@Override
+	public abstract void amecs$reset();
+
+	@Override
 	public KeyModifiers amecs$getKeyModifiers() {
 		return keyModifiers;
 	}
 
 	@Inject(method = "<init>(Ljava/lang/String;Lnet/minecraft/client/util/InputUtil$Type;ILjava/lang/String;)V", at = @At("RETURN"))
 	private void onConstructed(String id, InputUtil.Type type, int defaultCode, String category, CallbackInfo callbackInfo) {
-		keysByCode.remove(keyCode);
 		KeyBindingManager.register((KeyBinding) (Object) this);
 	}
 
 	@Inject(method = "getLocalizedName()Ljava/lang/String;", at = @At("TAIL"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
 	public void getLocalizedName(CallbackInfoReturnable<String> callbackInfoReturnable, String i18nName, String glfwName) {
 		String name = (glfwName == null ? I18n.translate(i18nName) : glfwName);
-		String fullName;
+		StringBuilder fullName;
 		TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
 		ModifierPrefixTextProvider.Variation variation = ModifierPrefixTextProvider.Variation.WIDEST;
 		do {
-			StringBuilder builder = new StringBuilder();
-			if (keyModifiers.getControl()) {
-				builder.append(AmecsAPI.CONTROL_PREFIX.getText(variation));
-			}
-			if (keyModifiers.getShift()) {
-				builder.append(AmecsAPI.SHIFT_PREFIX.getText(variation));
-			}
-			if (keyModifiers.getAlt()) {
-				builder.append(AmecsAPI.ALT_PREFIX.getText(variation));
-			}
-			builder.append(name);
-			fullName = builder.toString();
-		} while ((variation = variation.shorter) != null && textRenderer.getStringWidth(fullName) > 70);
+			fullName = new StringBuilder(name);
+			for (KeyModifier keyModifier : KeyModifier.VALUES) {
+				if (keyModifier == KeyModifier.NONE) {
+					continue;
+				}
 
-		callbackInfoReturnable.setReturnValue(fullName);
+				if (keyModifiers.get(keyModifier)) {
+					fullName.insert(0, keyModifier.textProvider.getTranslation(variation));
+				}
+			}
+		} while ((variation = variation.getSmaller()) != null && textRenderer.getStringWidth(fullName.toString()) > 70);
+
+		callbackInfoReturnable.setReturnValue(fullName.toString());
 	}
 
 	@Inject(method = "matchesKey", at = @At("RETURN"), cancellable = true)
 	public void matchesKey(int keyCode, int scanCode, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-		if (!keyModifiers.isUnset() && !keyModifiers.isPressed()) callbackInfoReturnable.setReturnValue(false);
-		timesPressed = 0;
+		if (!keyModifiers.isUnset() && !keyModifiers.isPressed()) {
+			callbackInfoReturnable.setReturnValue(false);
+		}
 	}
 
 	@Inject(method = "matchesMouse", at = @At("RETURN"), cancellable = true)
 	public void matchesMouse(int mouse, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-		if (!keyModifiers.isUnset() && !keyModifiers.isPressed()) callbackInfoReturnable.setReturnValue(false);
-		timesPressed = 0;
+		if (!keyModifiers.isUnset() && !keyModifiers.isPressed()) {
+			callbackInfoReturnable.setReturnValue(false);
+		}
 	}
 
 	@Inject(method = "equals", at = @At("RETURN"), cancellable = true)
 	public void equals(KeyBinding other, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-		if (!keyModifiers.equals(((IKeyBinding) other).amecs$getKeyModifiers())) callbackInfoReturnable.setReturnValue(false);
+		if (!keyModifiers.equals(((IKeyBinding) other).amecs$getKeyModifiers())) {
+			callbackInfoReturnable.setReturnValue(false);
+		}
 	}
 
 	@Inject(method = "onKeyPressed", at = @At("HEAD"))
@@ -119,9 +133,10 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 		KeyBindingManager.onKeyPressed(keyCode);
 	}
 
-	@Inject(method = "setKeyPressed", at = @At("HEAD"))
+	@Inject(method = "setKeyPressed", at = @At("HEAD"), cancellable = true)
 	private static void setKeyPressed(InputUtil.KeyCode keyCode, boolean pressed, CallbackInfo callbackInfo) {
 		KeyBindingManager.setKeyPressed(keyCode, pressed);
+		callbackInfo.cancel();
 	}
 
 	@Inject(method = "updatePressedStates", at = @At("HEAD"), cancellable = true)
@@ -131,9 +146,8 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 	}
 
 	@Inject(method = "updateKeysByCode", at = @At("HEAD"), cancellable = true)
-	private static void updateKeyBindings(CallbackInfo callbackInfo) {
-		KeyBindingManager.keysById.clear();
-		keysById.values().forEach(KeyBindingManager::register);
+	private static void updateKeysByCode(CallbackInfo callbackInfo) {
+		KeyBindingManager.updateKeysByCode();
 		callbackInfo.cancel();
 	}
 
@@ -145,7 +159,6 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 
 	@Inject(method = "isDefault", at = @At("HEAD"), cancellable = true)
 	public void isDefault(CallbackInfoReturnable<Boolean> cir) {
-		//noinspection ConstantConditions
 		if (!((Object) this instanceof AmecsKeyBinding)) {
 			if (!keyModifiers.isUnset()) {
 				cir.setReturnValue(false);
