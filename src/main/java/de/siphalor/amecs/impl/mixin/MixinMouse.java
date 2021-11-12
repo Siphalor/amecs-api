@@ -1,5 +1,6 @@
 package de.siphalor.amecs.impl.mixin;
 
+import net.minecraft.client.gui.screen.option.KeybindsScreen;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,7 +20,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
-import net.minecraft.client.gui.screen.option.ControlsOptionsScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -99,8 +99,8 @@ public class MixinMouse {
 		InputUtil.Key keyCode = getKeyFromScroll(deltaY);
 
 		// check if we have scroll input for the options screen
-		if (client.currentScreen instanceof ControlsOptionsScreen) {
-			KeyBinding focusedBinding = ((ControlsOptionsScreen) client.currentScreen).focusedBinding;
+		if (client.currentScreen instanceof KeybindsScreen) {
+			KeyBinding focusedBinding = ((KeybindsScreen) client.currentScreen).selectedKeyBinding;
 			if (focusedBinding != null) {
 				if (!focusedBinding.isUnbound()) {
 					KeyModifiers keyModifiers = ((IKeyBinding) focusedBinding).amecs$getKeyModifiers();
@@ -108,7 +108,7 @@ public class MixinMouse {
 				}
 				client.options.setKeyCode(focusedBinding, keyCode);
 				KeyBinding.updateKeysByCode();
-				((ControlsOptionsScreen) client.currentScreen).focusedBinding = null;
+				((KeybindsScreen) client.currentScreen).selectedKeyBinding = null;
 				// if we do we cancel the method because we do not want the current screen to get the scroll event
 				callbackInfo.cancel();
 				return;

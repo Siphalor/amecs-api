@@ -7,7 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.option.ControlsOptionsScreen;
+import net.minecraft.client.gui.screen.option.KeybindsScreen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,11 +34,11 @@ public class MixinKeyboard {
 	@Inject(method = "onKey", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Keyboard;debugCrashStartTime:J", ordinal = 0))
 	private void onKey(long window, int int_1, int int_2, int int_3, int int_4, CallbackInfo callbackInfo) {
 		// Key released
-		if (int_3 == 0 && MinecraftClient.getInstance().currentScreen instanceof ControlsOptionsScreen) {
-			ControlsOptionsScreen screen = (ControlsOptionsScreen) MinecraftClient.getInstance().currentScreen;
+		if (int_3 == 0 && MinecraftClient.getInstance().currentScreen instanceof KeybindsScreen) {
+			KeybindsScreen screen = (KeybindsScreen) MinecraftClient.getInstance().currentScreen;
 
-			screen.focusedBinding = null;
-			screen.time = Util.getMeasuringTimeMs();
+			screen.selectedKeyBinding = null;
+			screen.lastKeyCodeUpdateTime = Util.getMeasuringTimeMs();
 		}
 
 		AmecsAPI.CURRENT_MODIFIERS.set(KeyModifier.fromKeyCode(InputUtil.fromKeyCode(int_1, int_2).getCode()), int_3 != 0);

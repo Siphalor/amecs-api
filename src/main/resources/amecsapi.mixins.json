@@ -5,7 +5,7 @@
 	"plugin": "de.siphalor.amecs.impl.mixin.AmecsAPIMixinConfig",
 	"mixins": [],
 	"client": [
-		"MixinControlsOptionsScreen",
+		"MixinKeybindsScreen",
 		"MixinGameOptions",
 		"MixinInputUtilType",
 		"MixinKeyBinding",

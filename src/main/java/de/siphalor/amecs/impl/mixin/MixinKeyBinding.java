@@ -2,10 +2,7 @@ package de.siphalor.amecs.impl.mixin;
 
 import java.util.Map;
 
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -39,12 +36,14 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 
 	@Shadow
 	@Final
-	private static Map<String, KeyBinding> keysById;
+	private static Map<String, KeyBinding> KEYS_BY_ID;
 
 	// set it to a NOPMap meaning everything done with this map is ignored. Because setting it to null would cause problems
 	// ... even if we remove the put in the KeyBinding constructor. Because maybe in the future this map is used elsewhere or a other mod uses it
 	@Shadow
-	private static Map<InputUtil.Key, KeyBinding> keyToBindings = NOPMap.nopMap();
+	@Final
+	@Mutable
+	private static Map<InputUtil.Key, KeyBinding> KEY_TO_BINDINGS = NOPMap.nopMap();
 
 	@Unique
 	private final KeyModifiers keyModifiers = new KeyModifiers();
@@ -167,6 +166,6 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 
 	@SuppressWarnings("unused")
 	private static Map<String, KeyBinding> amecs$getIdToKeyBindingMap() {
-		return keysById;
+		return KEYS_BY_ID;
 	}
 }
