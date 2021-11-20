@@ -8,6 +8,7 @@ import de.siphalor.amecs.impl.KeyBindingManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 
 /**
  * Utility methods and constants for Amecs and vanilla key bindings
@@ -36,6 +37,16 @@ public class KeyBindingUtils {
 	 */
 	public static void setLastScrollAmount(double lastScrollAmount) {
 		KeyBindingUtils.lastScrollAmount = lastScrollAmount;
+	}
+
+	/**
+	 * Gets the key object for the scroll direction
+	 *
+	 * @param deltaY the vertical (y) scroll amount {@link #getLastScrollAmount}
+	 * @return the key object
+	 */
+	public static InputUtil.KeyCode getKeyFromScroll(double deltaY) {
+		return InputUtil.Type.MOUSE.createFromCode(deltaY > 0 ? KeyBindingUtils.MOUSE_SCROLL_UP : KeyBindingUtils.MOUSE_SCROLL_DOWN);
 	}
 
 	/**
