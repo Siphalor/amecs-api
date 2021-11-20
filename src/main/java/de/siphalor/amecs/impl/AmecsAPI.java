@@ -21,6 +21,9 @@ public class AmecsAPI implements ClientModInitializer {
 
 	public static final KeyModifiers CURRENT_MODIFIERS = new KeyModifiers();
 
+	// this is used by KTIG
+	public static boolean TRIGGER_KEYBINDING_ON_SCROLL = true;
+
 	public static String makeKeyID(String keyName) {
 		return "key." + MOD_ID + "." + keyName;
 	}
