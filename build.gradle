@@ -7,7 +7,7 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 archivesBaseName = project.archives_base_name
-version = "${project.mod_version}+mc${project.minecraft_version}"
+version = "$mod_version+mc$minecraft_version".toString()
 group = project.maven_group
 
 loom {
@@ -80,8 +80,8 @@ jar {
 // configure the maven publication
 publishing {
 	publications {
-		mavenJava(MavenPublication) {
-			artifactId = "${project.archives_base_name}-${project.minecraft_major_version}"
+		create("mavenJava", MavenPublication) {
+			artifactId = "${project.archives_base_name}-${project.minecraft_major_version}".toString()
 
 			from components.java
 		}
