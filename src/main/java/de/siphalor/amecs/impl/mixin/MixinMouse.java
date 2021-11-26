@@ -56,7 +56,7 @@ public class MixinMouse implements IMouse {
 
 	// If this method changes make sure to also change the corresponding code in KTIG
 	private void onScrollReceived(double deltaY, boolean manualDeltaWheel, float g) {
-		int scrollCount = 0;
+		int scrollCount;
 		if (manualDeltaWheel) {
 			// from minecraft but patched
 			// this code might be wrong when the vanilla mc code changes
@@ -98,18 +98,25 @@ public class MixinMouse implements IMouse {
 		}
 	}
 
-	@Redirect(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseScrolled(DDD)Z", ordinal = 0))
-	private boolean mouseScrolled_onMouseScroll(Screen screen, double mouseX, double mouseY, double amount) {
-		// following is ensured
-		// client.currentScreen != null
+	@Inject(
+			method = "onMouseScroll",
+			at = @At(
+					value = "INVOKE_ASSIGN", ordinal = 0, shift = At.Shift.AFTER,
+					target = "Lnet/minecraft/client/gui/screen/Screen;mouseScrolled(DDD)Z"
+			),
+			locals = LocalCapture.CAPTURE_FAILSOFT
+	)
+	private void mouseScrolled_onMouseScrolled(long window, double d, double e, CallbackInfo ci, double amount, double mouseX, double mouseY, boolean handled) {
+		mouseScrolled_eventUsed = handled;
+		if (handled) {
+			return;
+		}
 
-		mouseScrolled_eventUsed = client.currentScreen.mouseScrolled(mouseX, mouseY, amount);
-		if (!mouseScrolled_eventUsed && client.currentScreen.passEvents) {
+		if (client.currentScreen.passEvents) {
 			if (AmecsAPI.TRIGGER_KEYBINDING_ON_SCROLL) {
 				onScrollReceived(KeyBindingUtils.getLastScrollAmount(), true, 0);
 			}
 		}
-		return mouseScrolled_eventUsed;
 	}
 
 	@Inject(method = "onMouseScroll", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/client/gui/screen/Screen;", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
