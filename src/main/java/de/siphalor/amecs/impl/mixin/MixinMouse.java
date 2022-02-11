@@ -55,7 +55,7 @@ public class MixinMouse implements IMouse {
 	}
 
 	// If this method changes make sure to also change the corresponding code in KTIG
-	private void onScrollReceived(double deltaY, boolean manualDeltaWheel, float g) {
+	private void onScrollReceived(double deltaY, boolean manualDeltaWheel, int g) {
 		int scrollCount;
 		if (manualDeltaWheel) {
 			// from minecraft but patched
@@ -73,7 +73,7 @@ public class MixinMouse implements IMouse {
 			eventDeltaWheel -= scrollCount;
 			// -from minecraft
 		} else {
-			scrollCount = (int) g;
+			scrollCount = g;
 		}
 
 		InputUtil.Key keyCode = KeyBindingUtils.getKeyFromScroll(scrollCount);
@@ -91,7 +91,7 @@ public class MixinMouse implements IMouse {
 	}
 
 	@Inject(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSpectator()Z", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-	private void isSpectator_onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, double deltaY, float g) {
+	private void isSpectator_onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, double deltaY, int g) {
 		// we are here in the else branch of "this.client.currentScreen != null" meaning currentScreen == null
 		if (AmecsAPI.TRIGGER_KEYBINDING_ON_SCROLL) {
 			onScrollReceived(KeyBindingUtils.getLastScrollAmount(), false, g);

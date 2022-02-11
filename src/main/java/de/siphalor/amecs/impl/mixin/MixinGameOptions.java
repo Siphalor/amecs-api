@@ -30,7 +30,7 @@ public class MixinGameOptions {
 
 	@Shadow
 	@Final
-	public KeyBinding[] keysAll;
+	public KeyBinding[] allKeys;
 	@Unique
 	private File amecsOptionsFile;
 
@@ -38,7 +38,7 @@ public class MixinGameOptions {
 	public void write(CallbackInfo callbackInfo) {
 		try (PrintWriter writer = new PrintWriter(new FileOutputStream(amecsOptionsFile))) {
 			KeyModifiers modifiers;
-			for (KeyBinding binding : keysAll) {
+			for (KeyBinding binding : allKeys) {
 				modifiers = ((IKeyBinding) binding).amecs$getKeyModifiers();
 				writer.println(KEY_MODIFIERS_PREFIX + binding.getTranslationKey() + ":" + modifiers.serializeValue());
 			}
