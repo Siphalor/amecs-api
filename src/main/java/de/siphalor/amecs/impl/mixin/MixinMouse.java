@@ -6,7 +6,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -21,7 +20,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.ControlsOptionsScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -96,25 +94,19 @@ public class MixinMouse implements IMouse {
 		}
 	}
 
-	@Inject(
-			method = "onMouseScroll",
-			at = @At(
-					value = "INVOKE_ASSIGN", ordinal = 0, shift = At.Shift.AFTER,
-					target = "Lnet/minecraft/client/gui/screen/Screen;mouseScrolled(DDD)Z"
-			),
-			locals = LocalCapture.CAPTURE_FAILSOFT
-	)
-	private void mouseScrolled_onMouseScrolled(long window, double d, double e, CallbackInfo ci, double amount, double mouseX, double mouseY, boolean handled) {
-		mouseScrolled_eventUsed = handled;
+	@SuppressWarnings("unused")
+	private boolean amecs$onMouseScrolledScreen(boolean handled) {
+		this.mouseScrolled_eventUsed = handled;
 		if (handled) {
-			return;
+			return true;
 		}
 
-		if (client.currentScreen.passEvents) {
+		if (this.client.currentScreen.passEvents) {
 			if (AmecsAPI.TRIGGER_KEYBINDING_ON_SCROLL) {
-				onScrollReceived(KeyBindingUtils.getLastScrollAmount(), true, 0);
+				this.onScrollReceived(KeyBindingUtils.getLastScrollAmount(), true, 0);
 			}
 		}
+		return false;
 	}
 
 	@Inject(method = "onMouseScroll", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/client/gui/screen/Screen;", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
@@ -143,5 +135,4 @@ public class MixinMouse implements IMouse {
 			callbackInfo.cancel();
 		}
 	}
-
 }
