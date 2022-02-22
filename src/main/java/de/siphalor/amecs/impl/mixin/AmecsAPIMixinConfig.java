@@ -58,6 +58,11 @@ public class AmecsAPIMixinConfig implements IMixinConfigPlugin {
 
 	@Override
 	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+
+	}
+
+	@Override
+	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
 		if (targetClassName.equals(mouseClassRemapped)) {
 			String onMouseScrollRemapped = mappingResolver.mapMethodName("intermediary", MOUSE_CLASS_INTERMEDIARY, "method_1598", "(JDD)V");
 
@@ -72,11 +77,6 @@ public class AmecsAPIMixinConfig implements IMixinConfigPlugin {
 				}
 			}
 		}
-	}
-
-	@Override
-	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-
 	}
 
 	// The purpose of this is to capture the return value of the currentScreen.mouseScrolled call.
