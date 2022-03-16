@@ -33,6 +33,9 @@
 		}
 	},
 	"depends": {
-		"fabricloader": ">=0.4.0"
+		"fabricloader": ">=0.4.0",
+		"fabric-api-base": ">=0.4",
+		"fabric-key-binding-api-v1": "^1.0.5",
+		"fabric-resource-loader-v0": "*"
 	}
 }

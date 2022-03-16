@@ -35,14 +35,12 @@ dependencies {
 		exclude module: "amecsapi-${project.minecraft_major_version}"
 	}
 
-	def fabric_deps = [
-			"fabric-api-base"          : "0.4.3+d7c144a8bc",
-			"fabric-key-binding-api-v1": "1.0.11+54e5b2ecbc",
-			"fabric-resource-loader-v0": "0.4.15+d882b915bc"
-	]
-	for (dep in fabric_deps.entrySet()) {
-		modApi "net.fabricmc.fabric-api:" + dep.getKey() + ":" + dep.getValue()
-		include "net.fabricmc.fabric-api:" + dep.getKey() + ":" + dep.getValue()
+	for (mod in [
+			"fabric-api-base",
+			"fabric-key-binding-api-v1",
+			"fabric-resource-loader-v0"
+	]) {
+		modImplementation(fabricApi.module(mod, project.fabric_api_version))
 	}
 }
 
