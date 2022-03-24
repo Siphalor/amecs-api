@@ -82,6 +82,7 @@ publishing {
 			artifactId = "${project.archives_base_name}-${project.minecraft_major_version}".toString()
 
 			from components.java
+			java.withSourcesJar()
 		}
 	}
 
