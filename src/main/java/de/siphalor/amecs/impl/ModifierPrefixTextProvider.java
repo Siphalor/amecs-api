@@ -3,15 +3,14 @@ package de.siphalor.amecs.impl;
 import de.siphalor.amecs.api.KeyModifier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.text.BaseText;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.TranslatableTextContent;
 
 @Environment(EnvType.CLIENT)
 public class ModifierPrefixTextProvider {
-	private static final Text SUFFIX = new LiteralText(" + ");
-	private static final Text COMPRESSED_SUFFIX = new LiteralText("+");
+	private static final Text SUFFIX = Text.literal(" + ");
+	private static final Text COMPRESSED_SUFFIX = Text.literal("+");
 	private final String translationKey;
 
 	public ModifierPrefixTextProvider(KeyModifier modifier) {
@@ -22,12 +21,12 @@ public class ModifierPrefixTextProvider {
 		this.translationKey = translationKey;
 	}
 
-	protected BaseText getBaseText(Variation variation) {
-		return variation.getTranslatableText(translationKey);
+	protected MutableText getBaseText(Variation variation) {
+		return MutableText.of(variation.getTranslatableText(translationKey));
 	}
 
-	public BaseText getText(Variation variation) {
-		BaseText text = getBaseText(variation);
+	public MutableText getText(Variation variation) {
+		MutableText text = getBaseText(variation);
 		if (variation == Variation.COMPRESSED) {
 			text.append(COMPRESSED_SUFFIX);
 		} else {
@@ -54,8 +53,8 @@ public class ModifierPrefixTextProvider {
 			this.translateKeySuffix = translateKeySuffix;
 		}
 
-		public TranslatableText getTranslatableText(String translationKey) {
-			return new TranslatableText(translationKey + translateKeySuffix);
+		public TranslatableTextContent getTranslatableText(String translationKey) {
+			return new TranslatableTextContent(translationKey + translateKeySuffix);
 		}
 
 		public Variation getNextVariation(int amount) {
