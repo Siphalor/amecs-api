@@ -1,6 +1,7 @@
 plugins {
 	id 'fabric-loom' version '0.10-SNAPSHOT'
 	id 'maven-publish'
+	id 'org.cadixdev.licenser' version '0.6.1'
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -31,6 +32,12 @@ dependencies {
 	modImplementation("de.siphalor:nmuk-${project.minecraft_major_version}:1.0.0+mc+") {
 		exclude module: "amecsapi-${project.minecraft_major_version}"
 	}
+}
+
+license {
+	header = project.file('LICENSE_HEADER')
+
+	include '**/*.java'
 }
 
 processResources {
