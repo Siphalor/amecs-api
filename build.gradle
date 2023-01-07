@@ -11,6 +11,13 @@ archivesBaseName = project.archives_base_name
 version = "$mod_version+mc$minecraft_version".toString()
 group = project.maven_group
 
+sourceSets {
+	testmod {
+		compileClasspath += main.compileClasspath
+		runtimeClasspath += main.runtimeClasspath
+	}
+}
+
 loom {
 	accessWidenerPath.set(file("src/main/resources/amecsapi.accesswidener"))
 }
@@ -32,6 +39,8 @@ dependencies {
 	modImplementation("de.siphalor:nmuk-${project.minecraft_major_version}:1.0.0+mc+") {
 		exclude module: "amecsapi-${project.minecraft_major_version}"
 	}
+
+	testmodImplementation sourceSets.main.output
 }
 
 license {
