@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020-2022 Siphalor
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package de.siphalor.amecs.impl.mixin;
 
 import de.siphalor.amecs.api.KeyModifier;
@@ -23,7 +39,7 @@ public class MixinKeyboard {
 	@Shadow
 	private boolean repeatEvents;
 
-	@Inject(method = "onKey", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;hasControlDown()Z", ordinal = 1, shift = At.Shift.BEFORE), cancellable = true)
+	@Inject(method = "onKey", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/client/gui/screen/Screen;", ordinal = 1, shift = At.Shift.BEFORE), cancellable = true)
 	private void onKeyPriority(long window, int int_1, int int_2, int int_3, int int_4, CallbackInfo callbackInfo) {
 		if (int_3 == 1 || (int_3 == 2 && repeatEvents)) {
 			if (KeyBindingManager.onKeyPressedPriority(InputUtil.fromKeyCode(int_1, int_2)))
