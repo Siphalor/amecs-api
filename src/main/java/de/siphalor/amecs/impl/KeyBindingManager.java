@@ -38,6 +38,9 @@ public class KeyBindingManager {
 	// rather than streaming all and throwing out a bunch every time
 	public static Map<InputUtil.KeyCode, List<KeyBinding>> keysById = new HashMap<>();
 	public static Map<InputUtil.KeyCode, List<KeyBinding>> keysById_priority = new HashMap<>();
+
+	private static final boolean isNmukLoaded = FabricLoader.getInstance().isModLoaded("nmuk");
+
 	/**
 	 *
 	 * @param keysById_map
@@ -106,10 +109,9 @@ public class KeyBindingManager {
 	}
 
 	public static void onKeyPressed(InputUtil.KeyCode keyCode) {
-		boolean nmuk = FabricLoader.getInstance().isModLoaded("nmuk");
 		getMatchingKeyBindings(keyCode, false).forEach(keyBinding -> {
 			((IKeyBinding) keyBinding).amecs$incrementTimesPressed();
-			if (nmuk) {
+			if (isNmukLoaded) {
 				KeyBinding parent = NMUKProxy.getParent(keyBinding);
 				if (parent != null) {
 					((IKeyBinding) parent).amecs$incrementTimesPressed();
