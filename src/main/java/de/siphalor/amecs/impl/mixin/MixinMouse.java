@@ -100,6 +100,7 @@ public class MixinMouse implements IMouse {
 		// default minecraft scroll logic is in HotbarScrollKeyBinding in amecs
 	}
 
+	@SuppressWarnings("InvalidInjectorMethodSignature")
 	@Inject(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSpectator()Z", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
 	private void isSpectator_onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, double deltaY, int scrollAmount) {
 		if (AmecsAPI.TRIGGER_KEYBINDING_ON_SCROLL) {
