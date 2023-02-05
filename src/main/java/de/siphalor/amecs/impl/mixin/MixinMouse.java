@@ -67,8 +67,7 @@ public class MixinMouse implements IMouse {
 	}
 
 	// If this method changes make sure to also change the corresponding code in KTIG
-	private void onScrollReceived(double deltaY, boolean manualDeltaWheel, float g) {
-		int scrollCount;
+	private void onScrollReceived(double deltaY, boolean manualDeltaWheel, int scrollAmount) {
 		if (manualDeltaWheel) {
 			// from minecraft but patched
 			// this code might be wrong when the vanilla mc code changes
@@ -77,25 +76,23 @@ public class MixinMouse implements IMouse {
 			}
 
 			eventDeltaWheel += deltaY;
-			scrollCount = (int) eventDeltaWheel;
-			if (scrollCount == 0) {
+			scrollAmount = (int) eventDeltaWheel;
+			if (scrollAmount == 0) {
 				return;
 			}
 
-			eventDeltaWheel -= scrollCount;
+			eventDeltaWheel -= scrollAmount;
 			// -from minecraft
-		} else {
-			scrollCount = (int) g;
 		}
 
-		InputUtil.KeyCode keyCode = KeyBindingUtils.getKeyFromScroll(scrollCount);
+		InputUtil.KeyCode keyCode = KeyBindingUtils.getKeyFromScroll(scrollAmount);
 
 		KeyBinding.setKeyPressed(keyCode, true);
-		scrollCount = Math.abs(scrollCount);
+		scrollAmount = Math.abs(scrollAmount);
 
-		while (scrollCount > 0) {
+		while (scrollAmount > 0) {
 			KeyBinding.onKeyPressed(keyCode);
-			scrollCount--;
+			scrollAmount--;
 		}
 		KeyBinding.setKeyPressed(keyCode, false);
 
@@ -103,10 +100,10 @@ public class MixinMouse implements IMouse {
 	}
 
 	@Inject(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSpectator()Z", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-	private void isSpectator_onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, double deltaY, float g) {
+	private void isSpectator_onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, double deltaY, float scrollAmount) {
 		// we are here in the else branch of "this.client.currentScreen != null" meaning currentScreen == null
 		if (AmecsAPI.TRIGGER_KEYBINDING_ON_SCROLL) {
-			onScrollReceived(KeyBindingUtils.getLastScrollAmount(), false, g);
+			onScrollReceived(KeyBindingUtils.getLastScrollAmount(), false, (int) scrollAmount);
 		}
 	}
 
