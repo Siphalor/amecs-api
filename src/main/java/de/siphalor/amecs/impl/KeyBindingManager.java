@@ -16,21 +16,20 @@
 
 package de.siphalor.amecs.impl;
 
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import de.siphalor.amecs.api.KeyBindingUtils;
 import de.siphalor.amecs.api.KeyModifier;
 import de.siphalor.amecs.api.PriorityKeyBinding;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
 public class KeyBindingManager {
@@ -38,8 +37,6 @@ public class KeyBindingManager {
 	// rather than streaming all and throwing out a bunch every time
 	public static Map<InputUtil.KeyCode, List<KeyBinding>> keysById = new HashMap<>();
 	public static Map<InputUtil.KeyCode, List<KeyBinding>> keysById_priority = new HashMap<>();
-
-	private static final boolean isNmukLoaded = FabricLoader.getInstance().isModLoaded("nmuk");
 
 	/**
 	 *
@@ -109,15 +106,9 @@ public class KeyBindingManager {
 	}
 
 	public static void onKeyPressed(InputUtil.KeyCode keyCode) {
-		getMatchingKeyBindings(keyCode, false).forEach(keyBinding -> {
-			((IKeyBinding) keyBinding).amecs$incrementTimesPressed();
-			if (isNmukLoaded) {
-				KeyBinding parent = NMUKProxy.getParent(keyBinding);
-				if (parent != null) {
-					((IKeyBinding) parent).amecs$incrementTimesPressed();
-				}
-			}
-		});
+		getMatchingKeyBindings(keyCode, false).forEach(keyBinding ->
+			((IKeyBinding) keyBinding).amecs$incrementTimesPressed()
+		);
 	}
 
 	private static Stream<KeyBinding> getKeyBindingsFromMap(Map<InputUtil.KeyCode, List<KeyBinding>> keysById_map) {

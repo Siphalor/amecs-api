@@ -141,4 +141,11 @@ public class KeyBindingUtils {
 	public static KeyModifiers getBoundModifiers(KeyBinding keyBinding) {
 		return ((IKeyBinding) keyBinding).amecs$getKeyModifiers();
 	}
+
+	public static void resetBoundModifiers(KeyBinding keyBinding) {
+		((IKeyBinding) keyBinding).amecs$getKeyModifiers().unset();
+		if (keyBinding instanceof AmecsKeyBinding) {
+			((AmecsKeyBinding) keyBinding).resetKeyBinding();
+		}
+	}
 }
