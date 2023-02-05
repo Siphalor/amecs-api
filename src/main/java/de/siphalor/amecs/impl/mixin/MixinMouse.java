@@ -22,6 +22,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -100,11 +101,15 @@ public class MixinMouse implements IMouse {
 	}
 
 	@Inject(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSpectator()Z", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-	private void isSpectator_onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, double deltaY, float scrollAmount) {
-		// we are here in the else branch of "this.client.currentScreen != null" meaning currentScreen == null
+	private void isSpectator_onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, double deltaY, int scrollAmount) {
 		if (AmecsAPI.TRIGGER_KEYBINDING_ON_SCROLL) {
-			onScrollReceived(KeyBindingUtils.getLastScrollAmount(), false, (int) scrollAmount);
+			onScrollReceived(KeyBindingUtils.getLastScrollAmount(), false, scrollAmount);
 		}
+	}
+
+	@Surrogate
+	private void isSpectator_onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, double deltaY, float scrollAmount) {
+		isSpectator_onMouseScroll(window, rawX, rawY, callbackInfo, deltaY, (int) scrollAmount);
 	}
 
 	@SuppressWarnings("unused")
