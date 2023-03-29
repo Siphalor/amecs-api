@@ -12,8 +12,7 @@
 		"MixinKeyBindingEntry",
 		"MixinKeyboard",
 		"MixinMinecraftClient",
-		"MixinMouse",
-		"MixinNMUKKeyBindingHelper"
+		"MixinMouse"
 	],
 	"server": [],
 	"injectors": {
