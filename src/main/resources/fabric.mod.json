@@ -34,5 +34,8 @@
 	},
 	"depends": {
 		"fabricloader": ">=0.4.0"
+	},
+	"conflicts": {
+		"nmuk": "<=1.0.999"
 	}
 }

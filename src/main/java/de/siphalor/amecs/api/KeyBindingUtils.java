@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Siphalor
+ * Copyright 2020-2023 Siphalor
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 import de.siphalor.amecs.impl.KeyBindingManager;
+import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.option.KeyBinding;
@@ -130,5 +131,21 @@ public class KeyBindingUtils {
 	 */
 	public static boolean registerHiddenKeyBinding(KeyBinding keyBinding) {
 		return KeyBindingManager.register(keyBinding);
+	}
+
+	/**
+	 * Gets the key modifiers that are bound to the given key binding
+	 * @param keyBinding the key binding
+	 * @return the key modifiers
+	 */
+	public static KeyModifiers getBoundModifiers(KeyBinding keyBinding) {
+		return ((IKeyBinding) keyBinding).amecs$getKeyModifiers();
+	}
+
+	public static void resetBoundModifiers(KeyBinding keyBinding) {
+		((IKeyBinding) keyBinding).amecs$getKeyModifiers().unset();
+		if (keyBinding instanceof AmecsKeyBinding) {
+			((AmecsKeyBinding) keyBinding).resetKeyBinding();
+		}
 	}
 }
