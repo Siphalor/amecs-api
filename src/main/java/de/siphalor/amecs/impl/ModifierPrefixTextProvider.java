@@ -70,7 +70,7 @@ public class ModifierPrefixTextProvider {
 		}
 
 		public TranslatableTextContent getTranslatableText(String translationKey) {
-			return new TranslatableTextContent(translationKey + translateKeySuffix);
+			return new TranslatableTextContent(translationKey + translateKeySuffix, null, new Object[0]);
 		}
 
 		public Variation getNextVariation(int amount) {

@@ -16,6 +16,7 @@
 
 package de.siphalor.amecs.impl.mixin;
 
+import net.minecraft.client.gui.screen.option.ControlsListWidget;
 import net.minecraft.client.gui.screen.option.KeybindsScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -46,6 +47,8 @@ public abstract class MixinKeybindsScreen extends GameOptionsScreen {
 	@Shadow
 	public long lastKeyCodeUpdateTime;
 
+	@Shadow private ControlsListWidget controlsList;
+
 	public MixinKeybindsScreen(Screen screen, GameOptions gameOptions, Text text) {
 		super(screen, gameOptions, text);
 	}
@@ -66,7 +69,6 @@ public abstract class MixinKeybindsScreen extends GameOptionsScreen {
 
 	@Inject(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/GameOptions;setKeyCode(Lnet/minecraft/client/option/KeyBinding;Lnet/minecraft/client/util/InputUtil$Key;)V", ordinal = 1), cancellable = true)
 	public void onKeyPressed(int keyCode, int scanCode, int int_3, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-		callbackInfoReturnable.setReturnValue(true);
 		if (selectedKeyBinding.isUnbound()) {
 			gameOptions.setKeyCode(selectedKeyBinding, InputUtil.fromKeyCode(keyCode, scanCode));
 		} else {
@@ -77,12 +79,15 @@ public abstract class MixinKeybindsScreen extends GameOptionsScreen {
 			if (mainKeyModifier != KeyModifier.NONE && keyModifier == KeyModifier.NONE) {
 				keyModifiers.set(mainKeyModifier, true);
 				gameOptions.setKeyCode(selectedKeyBinding, InputUtil.fromKeyCode(keyCode, scanCode));
+				return;
 			} else {
 				keyModifiers.set(keyModifier, true);
 				keyModifiers.cleanup(selectedKeyBinding);
 			}
 		}
-		lastKeyCodeUpdateTime = Util.getMeasuringTimeMs();
-		KeyBinding.updateKeysByCode();
+
+		this.lastKeyCodeUpdateTime = Util.getMeasuringTimeMs();
+		this.controlsList.update();
+		callbackInfoReturnable.setReturnValue(true);
 	}
 }

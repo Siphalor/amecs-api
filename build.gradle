@@ -39,9 +39,9 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.minecraft_version}+build.${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	modImplementation("de.siphalor:nmuk-${project.minecraft_major_version}:1.0.1+mc1.19.3") {
-		exclude module: "amecsapi-${project.minecraft_major_version}"
-	}
+	//modImplementation("de.siphalor:nmuk-${project.minecraft_major_version}:1.1.0+mc1.19.3") {
+	//	exclude module: "amecsapi-${project.minecraft_major_version}"
+	//}
 
 	for (mod in [
 			"fabric-api-base",

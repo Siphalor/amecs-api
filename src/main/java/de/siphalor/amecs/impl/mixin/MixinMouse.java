@@ -140,9 +140,10 @@ public class MixinMouse implements IMouse {
 					KeyModifiers keyModifiers = ((IKeyBinding) focusedBinding).amecs$getKeyModifiers();
 					keyModifiers.set(KeyModifier.fromKey(((IKeyBinding) focusedBinding).amecs$getBoundKey()), true);
 				}
-				client.options.setKeyCode(focusedBinding, keyCode);
-				KeyBinding.updateKeysByCode();
-				((KeybindsScreen) client.currentScreen).selectedKeyBinding = null;
+				// This is a bit hacky, but the easiest way out
+				// If the selected binding != null, the mouse x and y will always be ignored - so no need to convert them
+				// The key code that InputUtil.MOUSE.createFromCode chooses is always one bigger than the input
+				client.currentScreen.mouseClicked(-1, -1, keyCode.getCode());
 				// if we do we cancel the method because we do not want the current screen to get the scroll event
 				callbackInfo.cancel();
 				return;

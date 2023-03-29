@@ -42,7 +42,10 @@ public class MixinKeyBindingEntry implements IKeyBindingEntry {
 	private KeyBinding binding;
 
 	@SuppressWarnings("UnresolvedMixinReference")
-	@Inject(method = "method_19870(Lnet/minecraft/client/option/KeyBinding;Lnet/minecraft/client/gui/widget/ButtonWidget;)V", at = @At("RETURN"))
+	@Inject(
+			method = "method_19870(Lnet/minecraft/client/option/KeyBinding;Lnet/minecraft/client/gui/widget/ButtonWidget;)V",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/option/ControlsListWidget;update()V")
+	)
 	public void onResetButtonClicked(KeyBinding keyBinding, ButtonWidget buttonWidget, CallbackInfo callbackInfo) {
 		((IKeyBinding) binding).amecs$getKeyModifiers().unset();
 		if (binding instanceof AmecsKeyBinding)
