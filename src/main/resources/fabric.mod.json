@@ -37,5 +37,8 @@
 		"fabric-api-base": ">=0.4",
 		"fabric-key-binding-api-v1": "^1.0.5",
 		"fabric-resource-loader-v0": "*"
+	},
+	"conflicts": {
+		"nmuk": "<=1.0.999"
 	}
 }

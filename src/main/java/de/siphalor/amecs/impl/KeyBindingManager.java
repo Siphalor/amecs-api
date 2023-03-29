@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Siphalor
+ * Copyright 2020-2023 Siphalor
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,20 @@
 
 package de.siphalor.amecs.impl;
 
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import de.siphalor.amecs.api.KeyBindingUtils;
 import de.siphalor.amecs.api.KeyModifier;
 import de.siphalor.amecs.api.PriorityKeyBinding;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
 public class KeyBindingManager {
@@ -38,9 +37,8 @@ public class KeyBindingManager {
 	// rather than streaming all and throwing out a bunch every time
 	public static Map<InputUtil.Key, List<KeyBinding>> keysById = new HashMap<>();
 	public static Map<InputUtil.Key, List<KeyBinding>> keysById_priority = new HashMap<>();
-
 	/**
-	 * 
+	 *
 	 * @param keysById_map
 	 * @param keyBinding
 	 * @return whether the keyBinding was removed. It is not removed if it was not contained
@@ -61,7 +59,7 @@ public class KeyBindingManager {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param keysById_map
 	 * @param keyBinding
 	 * @return whether the keyBinding was added. It is not added if it is already contained
@@ -81,7 +79,7 @@ public class KeyBindingManager {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param keyBinding
 	 * @return whether the keyBinding was added. It is not added if it is already contained
 	 */
@@ -107,16 +105,9 @@ public class KeyBindingManager {
 	}
 
 	public static void onKeyPressed(InputUtil.Key keyCode) {
-		boolean nmuk = FabricLoader.getInstance().isModLoaded("nmuk");
-		getMatchingKeyBindings(keyCode, false).forEach(keyBinding -> {
-			((IKeyBinding) keyBinding).amecs$incrementTimesPressed();
-			if (nmuk) {
-				KeyBinding parent = NMUKProxy.getParent(keyBinding);
-				if (parent != null) {
-					((IKeyBinding) parent).amecs$incrementTimesPressed();
-				}
-			}
-		});
+		getMatchingKeyBindings(keyCode, false).forEach(keyBinding ->
+			((IKeyBinding) keyBinding).amecs$incrementTimesPressed()
+		);
 	}
 
 	private static Stream<KeyBinding> getKeyBindingsFromMap(Map<InputUtil.Key, List<KeyBinding>> keysById_map) {
@@ -143,7 +134,7 @@ public class KeyBindingManager {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param keyBinding
 	 * @return whether the keyBinding was removed. It is not removed if it was not contained
 	 */

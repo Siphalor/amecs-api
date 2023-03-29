@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Siphalor
+ * Copyright 2020-2023 Siphalor
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -67,8 +68,7 @@ public class MixinMouse implements IMouse {
 	}
 
 	// If this method changes make sure to also change the corresponding code in KTIG
-	private void onScrollReceived(double deltaY, boolean manualDeltaWheel, int g) {
-		int scrollCount;
+	private void onScrollReceived(double deltaY, boolean manualDeltaWheel, int scrollAmount) {
 		if (manualDeltaWheel) {
 			// from minecraft but patched
 			// this code might be wrong when the vanilla mc code changes
@@ -77,37 +77,40 @@ public class MixinMouse implements IMouse {
 			}
 
 			eventDeltaWheel += deltaY;
-			scrollCount = (int) eventDeltaWheel;
-			if (scrollCount == 0) {
+			scrollAmount = (int) eventDeltaWheel;
+			if (scrollAmount == 0) {
 				return;
 			}
 
-			eventDeltaWheel -= scrollCount;
+			eventDeltaWheel -= scrollAmount;
 			// -from minecraft
-		} else {
-			scrollCount = g;
 		}
 
-		InputUtil.Key keyCode = KeyBindingUtils.getKeyFromScroll(scrollCount);
+		InputUtil.Key keyCode = KeyBindingUtils.getKeyFromScroll(scrollAmount);
 
 		KeyBinding.setKeyPressed(keyCode, true);
-		scrollCount = Math.abs(scrollCount);
+		scrollAmount = Math.abs(scrollAmount);
 
-		while (scrollCount > 0) {
+		while (scrollAmount > 0) {
 			KeyBinding.onKeyPressed(keyCode);
-			scrollCount--;
+			scrollAmount--;
 		}
 		KeyBinding.setKeyPressed(keyCode, false);
 
 		// default minecraft scroll logic is in HotbarScrollKeyBinding in amecs
 	}
 
+	@SuppressWarnings("InvalidInjectorMethodSignature")
 	@Inject(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSpectator()Z", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-	private void isSpectator_onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, double deltaY, int g) {
-		// we are here in the else branch of "this.client.currentScreen != null" meaning currentScreen == null
+	private void isSpectator_onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, double deltaY, int scrollAmount) {
 		if (AmecsAPI.TRIGGER_KEYBINDING_ON_SCROLL) {
-			onScrollReceived(KeyBindingUtils.getLastScrollAmount(), false, g);
+			onScrollReceived(KeyBindingUtils.getLastScrollAmount(), false, scrollAmount);
 		}
+	}
+
+	@Surrogate
+	private void isSpectator_onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, double deltaY, float scrollAmount) {
+		isSpectator_onMouseScroll(window, rawX, rawY, callbackInfo, deltaY, (int) scrollAmount);
 	}
 
 	@SuppressWarnings("unused")
