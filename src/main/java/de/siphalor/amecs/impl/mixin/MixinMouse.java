@@ -120,10 +120,8 @@ public class MixinMouse implements IMouse {
 			return true;
 		}
 
-		if (this.client.currentScreen.passEvents) {
-			if (AmecsAPI.TRIGGER_KEYBINDING_ON_SCROLL) {
-				this.onScrollReceived(KeyBindingUtils.getLastScrollAmount(), true, 0);
-			}
+		if (AmecsAPI.TRIGGER_KEYBINDING_ON_SCROLL) {
+			this.onScrollReceived(KeyBindingUtils.getLastScrollAmount(), true, 0);
 		}
 		return false;
 	}
