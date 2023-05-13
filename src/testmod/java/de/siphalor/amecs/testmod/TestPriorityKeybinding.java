@@ -26,14 +26,21 @@ import java.util.function.BooleanSupplier;
 
 public class TestPriorityKeybinding extends AmecsKeyBinding implements PriorityKeyBinding {
 	private final BooleanSupplier action;
+	private final BooleanSupplier releaseAction;
 
-	public TestPriorityKeybinding(Identifier id, InputUtil.Type type, int code, String category, KeyModifiers defaultModifiers, BooleanSupplier action) {
+	public TestPriorityKeybinding(Identifier id, InputUtil.Type type, int code, String category, KeyModifiers defaultModifiers, BooleanSupplier action, BooleanSupplier releaseAction) {
 		super(id, type, code, category, defaultModifiers);
 		this.action = action;
+		this.releaseAction = releaseAction;
 	}
 
 	@Override
 	public boolean onPressedPriority() {
 		return action.getAsBoolean();
+	}
+
+	@Override
+	public boolean onReleasedPriority() {
+		return releaseAction.getAsBoolean();
 	}
 }
