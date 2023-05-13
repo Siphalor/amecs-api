@@ -36,17 +36,17 @@ public class KeyBindingManager {
 	// split it in two maps because it is ways faster to only stream the map with the objects we need
 	// rather than streaming all and throwing out a bunch every time
 	public static Map<InputUtil.Key, List<KeyBinding>> keysById = new HashMap<>();
-	public static Map<InputUtil.Key, List<KeyBinding>> keysById_priority = new HashMap<>();
+	public static Map<InputUtil.Key, List<KeyBinding>> priorityKeysById = new HashMap<>();
 	/**
-	 *
-	 * @param keysById_map
-	 * @param keyBinding
+	 * Removes a key binding from one of the internal maps
+	 * @param targetMap the key binding map to remove from
+	 * @param keyBinding the key binding to remove
 	 * @return whether the keyBinding was removed. It is not removed if it was not contained
 	 */
-	private static boolean removeKeyBindingFromListFromMap(Map<InputUtil.Key, List<KeyBinding>> keysById_map, KeyBinding keyBinding) {
+	private static boolean removeKeyBindingFromListFromMap(Map<InputUtil.Key, List<KeyBinding>> targetMap, KeyBinding keyBinding) {
 		// we need to get the backing list to remove elements thus we can not use any of the other methods that return streams
 		InputUtil.Key keyCode = ((IKeyBinding) keyBinding).amecs$getBoundKey();
-		List<KeyBinding> keyBindings = keysById_map.get(keyCode);
+		List<KeyBinding> keyBindings = targetMap.get(keyCode);
 		if (keyBindings == null) {
 			return false;
 		}
@@ -59,18 +59,14 @@ public class KeyBindingManager {
 	}
 
 	/**
-	 *
-	 * @param keysById_map
-	 * @param keyBinding
+	 * Adds a key binding to one of the internal maps
+	 * @param targetMap the key binding map to add to
+	 * @param keyBinding the key binding to add
 	 * @return whether the keyBinding was added. It is not added if it is already contained
 	 */
-	private static boolean addKeyBindingToListFromMap(Map<InputUtil.Key, List<KeyBinding>> keysById_map, KeyBinding keyBinding) {
+	private static boolean addKeyBindingToListFromMap(Map<InputUtil.Key, List<KeyBinding>> targetMap, KeyBinding keyBinding) {
 		InputUtil.Key keyCode = ((IKeyBinding) keyBinding).amecs$getBoundKey();
-		List<KeyBinding> keyBindings = keysById_map.get(keyCode);
-		if (keyBindings == null) {
-			keyBindings = new ArrayList<>();
-			keysById_map.put(keyCode, keyBindings);
-		}
+		List<KeyBinding> keyBindings = targetMap.computeIfAbsent(keyCode, k -> new ArrayList<>());
 		if (keyBindings.contains(keyBinding)) {
 			return false;
 		}
@@ -79,20 +75,20 @@ public class KeyBindingManager {
 	}
 
 	/**
-	 *
-	 * @param keyBinding
+	 * Registers a key binding to Amecs API
+	 * @param keyBinding the key binding to register
 	 * @return whether the keyBinding was added. It is not added if it is already contained
 	 */
 	public static boolean register(KeyBinding keyBinding) {
 		if (keyBinding instanceof PriorityKeyBinding) {
-			return addKeyBindingToListFromMap(keysById_priority, keyBinding);
+			return addKeyBindingToListFromMap(priorityKeysById, keyBinding);
 		} else {
 			return addKeyBindingToListFromMap(keysById, keyBinding);
 		}
 	}
 
 	public static Stream<KeyBinding> getMatchingKeyBindings(InputUtil.Key keyCode, boolean priority) {
-		List<KeyBinding> keyBindingList = (priority ? keysById_priority : keysById).get(keyCode);
+		List<KeyBinding> keyBindingList = (priority ? priorityKeysById : keysById).get(keyCode);
 		if (keyBindingList == null)
 			return Stream.empty();
 		// this looks not right: If you have a kb: alt + y and shift + alt + y and you press shift + alt + y both will be triggered
@@ -115,7 +111,7 @@ public class KeyBindingManager {
 	}
 
 	private static void forEachKeyBinding(Consumer<KeyBinding> consumer) {
-		getKeyBindingsFromMap(keysById_priority).forEach(consumer);
+		getKeyBindingsFromMap(priorityKeysById).forEach(consumer);
 		getKeyBindingsFromMap(keysById).forEach(consumer);
 	}
 
@@ -134,8 +130,8 @@ public class KeyBindingManager {
 	}
 
 	/**
-	 *
-	 * @param keyBinding
+	 * Unregisters a key binding from Amecs API
+	 * @param keyBinding the key binding to unregister
 	 * @return whether the keyBinding was removed. It is not removed if it was not contained
 	 */
 	public static boolean unregister(KeyBinding keyBinding) {
@@ -147,13 +143,13 @@ public class KeyBindingManager {
 		// instead
 		boolean removed = false;
 		removed |= removeKeyBindingFromListFromMap(keysById, keyBinding);
-		removed |= removeKeyBindingFromListFromMap(keysById_priority, keyBinding);
+		removed |= removeKeyBindingFromListFromMap(priorityKeysById, keyBinding);
 		return removed;
 	}
 
 	public static void updateKeysByCode() {
 		keysById.clear();
-		keysById_priority.clear();
+		priorityKeysById.clear();
 		KeyBindingUtils.getIdToKeyBindingMap().values().forEach(KeyBindingManager::register);
 	}
 
@@ -162,9 +158,14 @@ public class KeyBindingManager {
 	}
 
 	public static boolean onKeyPressedPriority(InputUtil.Key keyCode) {
-		// because streams do evaluation lazy this code does only call onPressedPriority on so many keyBinding until one returns true
-		// Or if no one returns true all are called and an empty optional is returned
+		// because streams are lazily evaluated, this code only calls onPressedPriority so often until one returns true
 		Optional<KeyBinding> keyBindings = getMatchingKeyBindings(keyCode, true).filter(keyBinding -> ((PriorityKeyBinding) keyBinding).onPressedPriority()).findFirst();
+		return keyBindings.isPresent();
+	}
+
+	public static boolean onKeyReleasedPriority(InputUtil.Key keyCode) {
+		// because streams are lazily evaluated, this code only calls onPressedPriority so often until one returns true
+		Optional<KeyBinding> keyBindings = getMatchingKeyBindings(keyCode, true).filter(keyBinding -> ((PriorityKeyBinding) keyBinding).onReleasedPriority()).findFirst();
 		return keyBindings.isPresent();
 	}
 
