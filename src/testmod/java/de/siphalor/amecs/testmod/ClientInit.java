@@ -29,6 +29,9 @@ public class ClientInit implements ClientModInitializer {
 		KeyBindingHelper.registerKeyBinding(new TestPriorityKeybinding(new Identifier("amecsapi-testmod", "priority"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_Z, "key.categories.misc", new KeyModifiers(), () -> {
 			System.out.println("priority");
 			return true;
+		}, () -> {
+			System.out.println("priority release");
+			return true;
 		}));
 	}
 }
