@@ -163,9 +163,14 @@ public class KeyBindingManager {
 	}
 
 	public static boolean onKeyPressedPriority(InputUtil.KeyCode keyCode) {
-		// because streams do evaluation lazy this code does only call onPressedPriority on so many keyBinding until one returns true
-		// Or if no one returns true all are called and an empty optional is returned
+		// because streams are lazily evaluated, this code only calls onPressedPriority so often until one returns true
 		Optional<KeyBinding> keyBindings = getMatchingKeyBindings(keyCode, true).filter(keyBinding -> ((PriorityKeyBinding) keyBinding).onPressedPriority()).findFirst();
+		return keyBindings.isPresent();
+	}
+
+	public static boolean onKeyReleasedPriority(InputUtil.KeyCode keyCode) {
+		// because streams are lazily evaluated, this code only calls onPressedPriority so often until one returns true
+		Optional<KeyBinding> keyBindings = getMatchingKeyBindings(keyCode, true).filter(keyBinding -> ((PriorityKeyBinding) keyBinding).onReleasedPriority()).findFirst();
 		return keyBindings.isPresent();
 	}
 
