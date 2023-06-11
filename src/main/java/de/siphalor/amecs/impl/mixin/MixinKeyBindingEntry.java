@@ -16,9 +16,14 @@
 
 package de.siphalor.amecs.impl.mixin;
 
+import de.siphalor.amecs.impl.AmecsAPI;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.resource.language.I18n;
+import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -33,17 +38,43 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 
+import java.util.Arrays;
+import java.util.List;
+
 @SuppressWarnings("WeakerAccess")
 @Environment(EnvType.CLIENT)
 @Mixin(ControlsListWidget.KeyBindingEntry.class)
 public class MixinKeyBindingEntry implements IKeyBindingEntry {
+	private static final String DESCRIPTION_SUFFIX = "." + AmecsAPI.MOD_ID + ".description";
 	@Shadow
 	@Final
 	private KeyBinding binding;
-
 	@Shadow
 	@Final
 	private String bindingName;
+	@Shadow
+	@Final
+	private ButtonWidget editButton;
+
+	@Unique
+	private List<String> description;
+
+	@Inject(method = "<init>", at = @At("RETURN"))
+	public void onConstructed(ControlsListWidget parent, KeyBinding keyBinding, CallbackInfo callbackInfo) {
+		String descriptionKey = binding.getId() + DESCRIPTION_SUFFIX;
+		if (I18n.hasTranslation(descriptionKey)) {
+			description = Arrays.asList(StringUtils.split(I18n.translate(descriptionKey), '\n'));
+		} else {
+			description = null;
+		}
+	}
+
+	@Inject(method = "render", at = @At("RETURN"))
+	public void onRendered(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float delta, CallbackInfo callbackInfo) {
+		if (description != null && mouseY >= y && mouseY < y + entryHeight && mouseX < editButton.x) {
+			MinecraftClient.getInstance().currentScreen.renderTooltip(description, mouseX, mouseY);
+		}
+	}
 
 	@SuppressWarnings("UnresolvedMixinReference")
 	@Inject(method = "method_19870(Lnet/minecraft/client/options/KeyBinding;Lnet/minecraft/client/gui/widget/ButtonWidget;)V", at = @At("RETURN"))
