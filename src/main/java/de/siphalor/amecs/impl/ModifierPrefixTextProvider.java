@@ -58,13 +58,14 @@ public class ModifierPrefixTextProvider {
 	public String getTranslation(Variation variation) {
 		String text = variation.getTranslation(translationKey);
 		if (variation == Variation.COMPRESSED) {
-			return text += COMPRESSED_SUFFIX;
+			text += COMPRESSED_SUFFIX;
 		} else {
-			return text += SUFFIX;
+			text += SUFFIX;
 		}
+		return text;
 	}
 
-	public static enum Variation {
+	public enum Variation {
 		COMPRESSED(".tiny"),
 		TINY(".tiny"),
 		SHORT(".short"),

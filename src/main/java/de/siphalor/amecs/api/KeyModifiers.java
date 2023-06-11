@@ -299,7 +299,7 @@ public class KeyModifiers {
 				if (keyModifier == KeyModifier.NONE) {
 					continue;
 				}
-				long mask = (1 << keyModifier.id);
+				long mask = (1L << keyModifier.id);
 				ret[keyModifier.id] = (packedModifiers & mask) == mask;
 			}
 			return ret;

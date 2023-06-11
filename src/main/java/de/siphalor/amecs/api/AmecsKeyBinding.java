@@ -38,7 +38,7 @@ public class AmecsKeyBinding extends KeyBinding {
 	 *
 	 * @param id the id to use
 	 * @param type the input type which triggers this keybinding
-	 * @param code the the default key code
+	 * @param code the default key code
 	 * @param category the id of the category which should include this keybinding
 	 * @param defaultModifiers the default modifiers
 	 */
@@ -53,7 +53,7 @@ public class AmecsKeyBinding extends KeyBinding {
 	 *
 	 * @param id the id to use
 	 * @param type the input type which triggers this keybinding
-	 * @param code the the default key code
+	 * @param code the default key code
 	 * @param category the id of the category which should include this keybinding
 	 * @param defaultModifiers the default modifiers
 	 */
