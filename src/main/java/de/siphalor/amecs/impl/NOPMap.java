@@ -24,6 +24,7 @@ import java.util.function.Function;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Similar to Collections.EmptyMap
@@ -98,7 +99,6 @@ public class NOPMap<K, V> implements Map<K, V>, Serializable {
 
 	// Override default methods in Map
 	@Override
-	@SuppressWarnings("unchecked")
 	public V getOrDefault(Object k, V defaultValue) {
 		return defaultValue;
 	}
@@ -138,25 +138,25 @@ public class NOPMap<K, V> implements Map<K, V>, Serializable {
 	}
 
 	@Override
-	public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+	public V computeIfAbsent(K key, @NotNull Function<? super K, ? extends V> mappingFunction) {
 		// nop
 		return null;
 	}
 
 	@Override
-	public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+	public V computeIfPresent(K key, @NotNull BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
 		// nop
 		return null;
 	}
 
 	@Override
-	public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+	public V compute(K key, @NotNull BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
 		// nop
 		return null;
 	}
 
 	@Override
-	public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+	public V merge(K key, @NotNull V value, @NotNull BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
 		// nop
 		return null;
 	}
@@ -179,7 +179,7 @@ public class NOPMap<K, V> implements Map<K, V>, Serializable {
 	}
 
 	@Override
-	public void putAll(Map<? extends K, ? extends V> m) {
+	public void putAll(@NotNull Map<? extends K, ? extends V> m) {
 		// nop
 	}
 
