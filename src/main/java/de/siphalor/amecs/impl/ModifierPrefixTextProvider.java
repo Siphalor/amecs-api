@@ -52,7 +52,7 @@ public class ModifierPrefixTextProvider {
 		return text;
 	}
 
-	public static enum Variation {
+	public enum Variation {
 		COMPRESSED(".tiny"),
 		TINY(".tiny"),
 		SHORT(".short"),
