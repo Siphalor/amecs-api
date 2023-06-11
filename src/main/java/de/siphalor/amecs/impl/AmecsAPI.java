@@ -30,7 +30,7 @@ import net.fabricmc.api.Environment;
 @ApiStatus.Internal
 public class AmecsAPI implements ClientModInitializer {
 
-	public static Logger LOGGER = LogManager.getLogger();
+	public static final Logger LOGGER = LogManager.getLogger();
 
 	public static final String MOD_ID = "amecsapi";
 	public static final String MOD_NAME = "Amecs API";
@@ -46,11 +46,11 @@ public class AmecsAPI implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-
+		// Required to be a valid mod initializer
 	}
 
 	public static void log(Level level, String message) {
-		LOGGER.log(level, "[" + MOD_NAME + "] " + message);
+		LOGGER.log(level, "[{}] {}", MOD_NAME, message);
 	}
 
 }
