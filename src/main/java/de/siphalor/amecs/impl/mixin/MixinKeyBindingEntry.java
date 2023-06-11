@@ -16,6 +16,7 @@
 
 package de.siphalor.amecs.impl.mixin;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import de.siphalor.amecs.impl.AmecsAPI;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.language.I18n;
@@ -72,7 +73,9 @@ public class MixinKeyBindingEntry implements IKeyBindingEntry {
 	@Inject(method = "render", at = @At("RETURN"))
 	public void onRendered(int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float delta, CallbackInfo callbackInfo) {
 		if (description != null && mouseY >= y && mouseY < y + entryHeight && mouseX < editButton.x) {
+			GlStateManager.translated(0D, 0D, -100D);
 			MinecraftClient.getInstance().currentScreen.renderTooltip(description, mouseX, mouseY);
+			GlStateManager.disableLighting();
 		}
 	}
 
