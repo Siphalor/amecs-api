@@ -16,30 +16,67 @@
 
 package de.siphalor.amecs.impl.mixin;
 
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
 import de.siphalor.amecs.api.AmecsKeyBinding;
+import de.siphalor.amecs.impl.AmecsAPI;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
 import de.siphalor.amecs.impl.duck.IKeyBindingEntry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.option.ControlsListWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
+import org.apache.commons.lang3.StringUtils;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
 @Environment(EnvType.CLIENT)
 @Mixin(ControlsListWidget.KeyBindingEntry.class)
 public class MixinKeyBindingEntry implements IKeyBindingEntry {
+	private static final String DESCRIPTION_SUFFIX = "." + AmecsAPI.MOD_ID + ".description";
 	@Shadow
 	@Final
 	private KeyBinding binding;
+	@Shadow
+	@Final
+	private ButtonWidget editButton;
+
+	@Unique
+	private List<Text> description;
+
+	@Inject(method = "<init>", at = @At("RETURN"))
+	public void onConstructed(ControlsListWidget parent, KeyBinding keyBinding, Text text, CallbackInfo callbackInfo) {
+		String descriptionKey = binding.getTranslationKey() + DESCRIPTION_SUFFIX;
+		if (I18n.hasTranslation(descriptionKey)) {
+			String[] lines = StringUtils.split(I18n.translate(descriptionKey), '\n');
+			description = new ArrayList<>(lines.length);
+			for (String line : lines) {
+				description.add(Text.literal(line));
+			}
+		} else {
+			description = null;
+		}
+	}
+
+	@Inject(method = "render", at = @At("RETURN"))
+	public void onRendered(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float delta, CallbackInfo callbackInfo) {
+		if (description != null && mouseY >= y && mouseY < y + entryHeight && mouseX < editButton.getX()) {
+			MinecraftClient.getInstance().currentScreen.renderTooltip(matrices, description, mouseX, mouseY);
+		}
+	}
 
 	@SuppressWarnings("UnresolvedMixinReference")
 	@Inject(method = "method_19870(Lnet/minecraft/client/option/KeyBinding;Lnet/minecraft/client/gui/widget/ButtonWidget;)V", at = @At("RETURN"))
