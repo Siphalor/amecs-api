@@ -35,8 +35,8 @@ import java.util.stream.Stream;
 public class KeyBindingManager {
 	// split it in two maps because it is ways faster to only stream the map with the objects we need
 	// rather than streaming all and throwing out a bunch every time
-	public static Map<InputUtil.KeyCode, List<KeyBinding>> keysById = new HashMap<>();
-	public static Map<InputUtil.KeyCode, List<KeyBinding>> priorityKeysById = new HashMap<>();
+	public static final Map<InputUtil.KeyCode, List<KeyBinding>> keysById = new HashMap<>();
+	public static final Map<InputUtil.KeyCode, List<KeyBinding>> priorityKeysById = new HashMap<>();
 
 	/**
 	 * Removes a key binding from one of the internal maps
