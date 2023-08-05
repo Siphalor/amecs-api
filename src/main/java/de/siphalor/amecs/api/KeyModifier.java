@@ -44,7 +44,7 @@ public enum KeyModifier {
 	// these keyCodes are all from Type: InputUtil.Type.KEYSYM
 	final int[] keyCodes;
 
-	private KeyModifier(String name, int id, int... keyCodes) {
+	KeyModifier(String name, int id, int... keyCodes) {
 		this.name = name;
 		this.id = id;
 		textProvider = new ModifierPrefixTextProvider(this);
