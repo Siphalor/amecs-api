@@ -22,6 +22,8 @@ import java.util.Map;
 
 import de.siphalor.amecs.impl.KeyBindingManager;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
+import lombok.CustomLog;
+import lombok.Getter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.options.KeyBinding;
@@ -32,23 +34,19 @@ import net.minecraft.client.util.InputUtil;
  */
 @SuppressWarnings("unused")
 @Environment(EnvType.CLIENT)
+@CustomLog
 public class KeyBindingUtils {
 	public static final int MOUSE_SCROLL_UP = 512;
 	public static final int MOUSE_SCROLL_DOWN = 513;
 
+	/**
+	 * The last (y directional) scroll delta
+	 */
+	@Getter
 	private static double lastScrollAmount = 0;
 	private static Map<String, KeyBinding> idToKeyBindingMap;
 
 	private KeyBindingUtils() {}
-
-	/**
-	 * Gets the last (y directional) scroll delta
-	 *
-	 * @return the value
-	 */
-	public static double getLastScrollAmount() {
-		return lastScrollAmount;
-	}
 
 	/**
 	 * Sets the last (y directional) scroll amount. <b>For internal use only.</b>
@@ -86,7 +84,7 @@ public class KeyBindingUtils {
 				// noinspection unchecked
 				idToKeyBindingMap = (Map<String, KeyBinding>) method.invoke(null);
 			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-				e.printStackTrace();
+				log.error("Failed to get access to key bindings", e);
 			}
 		}
 		return idToKeyBindingMap;
