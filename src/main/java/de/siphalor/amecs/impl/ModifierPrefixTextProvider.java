@@ -66,7 +66,7 @@ public class ModifierPrefixTextProvider {
 
 		public final String translateKeySuffix;
 
-		private Variation(String translateKeySuffix) {
+		Variation(String translateKeySuffix) {
 			this.translateKeySuffix = translateKeySuffix;
 		}
 
