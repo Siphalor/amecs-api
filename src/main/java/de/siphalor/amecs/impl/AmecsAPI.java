@@ -16,9 +16,6 @@
 
 package de.siphalor.amecs.impl;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
 import de.siphalor.amecs.api.KeyModifiers;
@@ -29,9 +26,6 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 @ApiStatus.Internal
 public class AmecsAPI implements ClientModInitializer {
-
-	public static final Logger LOGGER = LogManager.getLogger();
-
 	public static final String MOD_ID = "amecsapi";
 	public static final String MOD_NAME = "Amecs API";
 
@@ -48,9 +42,4 @@ public class AmecsAPI implements ClientModInitializer {
 	public void onInitializeClient() {
 		// Required to be a valid mod initializer
 	}
-
-	public static void log(Level level, String message) {
-		LOGGER.log(level, "[{}] {}", MOD_NAME, message);
-	}
-
 }
