@@ -145,6 +145,19 @@ public class KeyBindingUtils {
 		return ((IKeyBinding) keyBinding).amecs$getKeyModifiers();
 	}
 
+	/**
+	 * Gets the default modifiers of the given key binding.
+	 * The returned value <b>must not be modified!</b>
+	 * @param keyBinding the key binding
+	 * @return a reference to the default modifiers
+	 */
+	public static KeyModifiers getDefaultModifiers(KeyBinding keyBinding) {
+		if (keyBinding instanceof AmecsKeyBinding) {
+			return ((AmecsKeyBinding) keyBinding).getDefaultModifiers();
+		}
+		return KeyModifiers.NO_MODIFIERS;
+	}
+
 	public static void resetBoundModifiers(KeyBinding keyBinding) {
 		((IKeyBinding) keyBinding).amecs$getKeyModifiers().unset();
 		if (keyBinding instanceof AmecsKeyBinding) {

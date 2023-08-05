@@ -16,17 +16,6 @@
 
 package de.siphalor.amecs.impl.mixin;
 
-import java.io.*;
-
-import org.apache.logging.log4j.Level;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
 import de.siphalor.amecs.api.KeyBindingUtils;
 import de.siphalor.amecs.api.KeyModifiers;
 import de.siphalor.amecs.impl.AmecsAPI;
@@ -36,6 +25,19 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.options.KeyBinding;
+import org.apache.logging.log4j.Level;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
 @Environment(EnvType.CLIENT)
@@ -52,10 +54,28 @@ public class MixinGameOptions {
 
 	@Inject(method = "write", at = @At("RETURN"))
 	public void write(CallbackInfo callbackInfo) {
+		List<KeyBinding> bindingsWithChangedModifiers = new ArrayList<>(keysAll.length);
+		for (KeyBinding keyBinding : keysAll) {
+			if (!KeyBindingUtils.getDefaultModifiers(keyBinding).equals(KeyBindingUtils.getBoundModifiers(keyBinding))) {
+				bindingsWithChangedModifiers.add(keyBinding);
+			}
+		}
+
+		if (bindingsWithChangedModifiers.isEmpty()) {
+			if (amecsOptionsFile.exists()) {
+				try {
+					Files.delete(amecsOptionsFile.toPath());
+				} catch (IOException e) {
+					AmecsAPI.log(Level.ERROR, "Failed to cleanup amecs key binding modifier file - weird.");
+				}
+			}
+			return;
+		}
+
 		try (PrintWriter writer = new PrintWriter(new FileOutputStream(amecsOptionsFile))) {
 			KeyModifiers modifiers;
-			for (KeyBinding binding : keysAll) {
-				modifiers = ((IKeyBinding) binding).amecs$getKeyModifiers();
+			for (KeyBinding binding : bindingsWithChangedModifiers) {
+				modifiers = KeyBindingUtils.getBoundModifiers(binding);
 				writer.println(KEY_MODIFIERS_PREFIX + binding.getId() + ":" + modifiers.serializeValue());
 			}
 		} catch (FileNotFoundException e) {
