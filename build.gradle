@@ -36,6 +36,9 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.minecraft_version}+build.${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
+	compileOnly(annotationProcessor("org.projectlombok:lombok:$lombok_version"))
+	testCompileOnly(testAnnotationProcessor("org.projectlombok:lombok:$lombok_version"))
+
 	modImplementation("de.siphalor:nmuk-${project.minecraft_major_version}:1.0.0+mc+") {
 		exclude module: "amecsapi-${project.minecraft_major_version}"
 	}
