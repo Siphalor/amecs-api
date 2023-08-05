@@ -98,4 +98,8 @@ public class AmecsKeyBinding extends KeyBinding {
 	public boolean isDefault() {
 		return defaultModifiers.equals(((IKeyBinding) this).amecs$getKeyModifiers()) && super.isDefault();
 	}
+
+	public KeyModifiers getDefaultModifiers() {
+		return defaultModifiers;
+	}
 }
