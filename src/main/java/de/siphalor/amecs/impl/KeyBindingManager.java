@@ -25,6 +25,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -32,11 +33,16 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
+@ApiStatus.Internal
 public class KeyBindingManager {
 	// split it in two maps because it is ways faster to only stream the map with the objects we need
 	// rather than streaming all and throwing out a bunch every time
 	public static final Map<InputUtil.KeyCode, List<KeyBinding>> keysById = new HashMap<>();
 	public static final Map<InputUtil.KeyCode, List<KeyBinding>> priorityKeysById = new HashMap<>();
+
+	private static final List<KeyBinding> pressedKeyBindings = new ArrayList<>(10);
+
+	private KeyBindingManager() {}
 
 	/**
 	 * Removes a key binding from one of the internal maps
@@ -44,7 +50,7 @@ public class KeyBindingManager {
 	 * @param keyBinding the key binding to remove
 	 * @return whether the keyBinding was removed. It is not removed if it was not contained
 	 */
-	private static boolean removeKeyBindingFromListFromMap(Map<InputUtil.KeyCode, List<KeyBinding>> targetMap, KeyBinding keyBinding) {
+	private static boolean removeKeyBindingFromMap(Map<InputUtil.KeyCode, List<KeyBinding>> targetMap, KeyBinding keyBinding) {
 		// we need to get the backing list to remove elements thus we can not use any of the other methods that return streams
 		InputUtil.KeyCode keyCode = ((IKeyBinding) keyBinding).amecs$getBoundKey();
 		List<KeyBinding> keyBindings = targetMap.get(keyCode);
@@ -92,8 +98,8 @@ public class KeyBindingManager {
 		List<KeyBinding> keyBindingList = (priority ? priorityKeysById : keysById).get(keyCode);
 		if (keyBindingList == null)
 			return Stream.empty();
-		// this looks not right: If you have a kb: alt + y and shift + alt + y and you press shift + alt + y both will be triggered
-		// Correction: It works as it should. Leaving this comments for future readers
+		// If there are two key bindings, alt + y and shift + alt + y, and you press shift + alt + y, both will be triggered.
+		// This is intentional.
 		Stream<KeyBinding> result = keyBindingList.stream().filter(keyBinding -> ((IKeyBinding) keyBinding).amecs$getKeyModifiers().isPressed());
 		List<KeyBinding> keyBindings = result.collect(Collectors.toList());
 		if (keyBindings.isEmpty())
@@ -126,7 +132,7 @@ public class KeyBindingManager {
 		forEachKeyBinding(keyBinding -> {
 			InputUtil.KeyCode key = ((IKeyBinding) keyBinding).amecs$getBoundKey();
 			boolean pressed = !keyBinding.isNotBound() && key.getCategory() == InputUtil.Type.KEYSYM && InputUtil.isKeyPressed(windowHandle, key.getKeyCode());
-			((IKeyBinding) keyBinding).amecs$setPressed(pressed);
+			setKeyBindingPressed(keyBinding, pressed);
 		});
 	}
 
@@ -139,12 +145,10 @@ public class KeyBindingManager {
 		if (keyBinding == null) {
 			return false;
 		}
-		// do not rebuild the entrie map if we do not have to
-		// KeyBinding.updateKeysByCode();
-		// instead
+		// avoid having to rebuild the whole entry map with KeyBinding.updateKeysByCode()
 		boolean removed = false;
-		removed |= removeKeyBindingFromListFromMap(keysById, keyBinding);
-		removed |= removeKeyBindingFromListFromMap(priorityKeysById, keyBinding);
+		removed |= removeKeyBindingFromMap(keysById, keyBinding);
+		removed |= removeKeyBindingFromMap(priorityKeysById, keyBinding);
 		return removed;
 	}
 
@@ -152,6 +156,17 @@ public class KeyBindingManager {
 		keysById.clear();
 		priorityKeysById.clear();
 		KeyBindingUtils.getIdToKeyBindingMap().values().forEach(KeyBindingManager::register);
+	}
+
+	public static void setKeyBindingPressed(KeyBinding keyBinding, boolean pressed) {
+		if (pressed != keyBinding.isPressed()) {
+			if (pressed) {
+				pressedKeyBindings.add(keyBinding);
+			} else {
+				pressedKeyBindings.remove(keyBinding);
+			}
+		}
+		((IKeyBinding) keyBinding).amecs$setPressed(pressed);
 	}
 
 	public static void unpressAll() {
@@ -173,6 +188,16 @@ public class KeyBindingManager {
 	public static void setKeyPressed(InputUtil.KeyCode keyCode, boolean pressed) {
 		AmecsAPI.CURRENT_MODIFIERS.set(KeyModifier.fromKeyCode(keyCode.getKeyCode()), pressed);
 
-		forEachKeyBindingWithKey(keyCode, keyBinding -> ((IKeyBinding) keyBinding).amecs$setPressed(pressed));
+		// Update keybindings with matching modifiers and the same keycode
+		forEachKeyBindingWithKey(keyCode, keyBinding -> setKeyBindingPressed(keyBinding, pressed));
+
+		// Handle the case, that a modifier has been released
+		pressedKeyBindings.removeIf(pressedKeyBinding -> {
+			if (!KeyBindingUtils.getBoundModifiers(pressedKeyBinding).isPressed()) {
+				((IKeyBinding) pressedKeyBinding).amecs$setPressed(false);
+				return true;
+			}
+			return false;
+		});
 	}
 }
