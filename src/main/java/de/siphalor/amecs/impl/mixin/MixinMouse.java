@@ -16,6 +16,7 @@
 
 package de.siphalor.amecs.impl.mixin;
 
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,9 +50,6 @@ public class MixinMouse implements IMouse {
 	@Final
 	private MinecraftClient client;
 
-	@Shadow
-	private double eventDeltaWheel;
-
 	@Unique
 	private boolean mouseScrolled_eventUsed;
 
@@ -67,90 +65,94 @@ public class MixinMouse implements IMouse {
 		}
 	}
 
-	// If this method changes make sure to also change the corresponding code in KTIG
-	private void onScrollReceived(double deltaY, boolean manualDeltaWheel, int scrollAmount) {
-		if (manualDeltaWheel) {
-			// from minecraft but patched
-			// this code might be wrong when the vanilla mc code changes
-			if (eventDeltaWheel != 0.0D && Math.signum(deltaY) != Math.signum(eventDeltaWheel)) {
-				eventDeltaWheel = 0.0D;
-			}
+	@Unique
+	private void onScrollReceived(double scrollAmountX, double scrollAmountY) {
+		InputUtil.Key keyCodeX = KeyBindingUtils.getKeyFromHorizontalScroll(scrollAmountX);
+		InputUtil.Key keyCodeY = KeyBindingUtils.getKeyFromVerticalScroll(scrollAmountY);
 
-			eventDeltaWheel += deltaY;
-			scrollAmount = (int) eventDeltaWheel;
-			if (scrollAmount == 0) {
-				return;
-			}
+		if (keyCodeX != null) {
+			handleScrollKey(keyCodeX, scrollAmountX);
+		}
+		if (keyCodeY != null) {
+			handleScrollKey(keyCodeY, scrollAmountY);
+		}
+	}
 
-			eventDeltaWheel -= scrollAmount;
-			// -from minecraft
+	@Unique
+	private void handleScrollKey(@NotNull InputUtil.Key key, double amount) {
+		KeyBinding.setKeyPressed(key, true);
+
+		amount = Math.abs(amount);
+		while (amount > 0) {
+			KeyBinding.onKeyPressed(key);
+			amount--;
 		}
 
-		InputUtil.Key keyCode = KeyBindingUtils.getKeyFromScroll(scrollAmount);
-
-		KeyBinding.setKeyPressed(keyCode, true);
-		scrollAmount = Math.abs(scrollAmount);
-
-		while (scrollAmount > 0) {
-			KeyBinding.onKeyPressed(keyCode);
-			scrollAmount--;
-		}
-		KeyBinding.setKeyPressed(keyCode, false);
-
-		// default minecraft scroll logic is in HotbarScrollKeyBinding in amecs
+		KeyBinding.setKeyPressed(key, false);
 	}
 
 	@SuppressWarnings("InvalidInjectorMethodSignature")
 	@Inject(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSpectator()Z", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-	private void isSpectator_onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, double deltaY, int scrollAmount) {
+	private void isSpectator_onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, boolean discreteScroll, double sensitivity, double scrollAmountX, double scrollAmountY) {
 		if (AmecsAPI.TRIGGER_KEYBINDING_ON_SCROLL) {
-			onScrollReceived(KeyBindingUtils.getLastScrollAmount(), false, scrollAmount);
+			onScrollReceived(scrollAmountX, scrollAmountY);
 		}
 	}
 
-	@Surrogate
-	private void isSpectator_onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, double deltaY, float scrollAmount) {
-		isSpectator_onMouseScroll(window, rawX, rawY, callbackInfo, deltaY, (int) scrollAmount);
-	}
-
+	// Invoked through manual injection by de.siphalor.amecs.impl.mixin.AmecsAPIMixinConfig
 	@SuppressWarnings("unused")
-	private boolean amecs$onMouseScrolledScreen(boolean handled) {
+	private boolean amecs$onMouseScrolledScreen(boolean handled, double xScrollAmount, double yScrollAmount) {
 		this.mouseScrolled_eventUsed = handled;
 		if (handled) {
 			return true;
 		}
 
 		if (AmecsAPI.TRIGGER_KEYBINDING_ON_SCROLL) {
-			this.onScrollReceived(KeyBindingUtils.getLastScrollAmount(), true, 0);
+			this.onScrollReceived(xScrollAmount, yScrollAmount);
 		}
 		return false;
 	}
 
 	@Inject(method = "onMouseScroll", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/client/gui/screen/Screen;", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-	private void onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, double deltaY) {
-		InputUtil.Key keyCode = KeyBindingUtils.getKeyFromScroll(deltaY);
+	private void onMouseScroll(long window, double rawX, double rawY, CallbackInfo callbackInfo, boolean discreteScroll, double sensitivity, double scrollAmountX, double scrollAmountY) {
+		InputUtil.Key keyCodeX = KeyBindingUtils.getKeyFromHorizontalScroll(scrollAmountX);
+		InputUtil.Key keyCodeY = KeyBindingUtils.getKeyFromVerticalScroll(scrollAmountY);
+
+		InputUtil.Key primaryKeyCode = keyCodeY != null ? keyCodeY : keyCodeX;
 
 		// check if we have scroll input for the options screen
 		if (client.currentScreen instanceof KeybindsScreen) {
-			KeyBinding focusedBinding = ((KeybindsScreen) client.currentScreen).selectedKeyBinding;
-			if (focusedBinding != null) {
-				if (!focusedBinding.isUnbound()) {
-					KeyModifiers keyModifiers = ((IKeyBinding) focusedBinding).amecs$getKeyModifiers();
-					keyModifiers.set(KeyModifier.fromKey(((IKeyBinding) focusedBinding).amecs$getBoundKey()), true);
-				}
-				// This is a bit hacky, but the easiest way out
-				// If the selected binding != null, the mouse x and y will always be ignored - so no need to convert them
-				// The key code that InputUtil.MOUSE.createFromCode chooses is always one bigger than the input
-				client.currentScreen.mouseClicked(-1, -1, keyCode.getCode());
-				// if we do we cancel the method because we do not want the current screen to get the scroll event
-				callbackInfo.cancel();
-				return;
-			}
+			if (handleScrollInKeybindsScreen(callbackInfo, primaryKeyCode)) return;
 		}
 
-		KeyBindingUtils.setLastScrollAmount(deltaY);
-		if (KeyBindingManager.onKeyPressedPriority(keyCode)) {
+		// Legacy support
+		//noinspection deprecation
+		KeyBindingUtils.setLastScrollAmount(scrollAmountY);
+		if (KeyBindingManager.onKeyPressedPriority(keyCodeY)) {
 			callbackInfo.cancel();
 		}
+		if (KeyBindingManager.onKeyPressedPriority(keyCodeX)) {
+			callbackInfo.cancel();
+		}
+	}
+
+	@Unique
+	private boolean handleScrollInKeybindsScreen(CallbackInfo callbackInfo, InputUtil.Key primaryKeyCode) {
+		assert client.currentScreen != null;
+		KeyBinding focusedBinding = ((KeybindsScreen) client.currentScreen).selectedKeyBinding;
+		if (focusedBinding != null) {
+			if (!focusedBinding.isUnbound()) {
+				KeyModifiers keyModifiers = ((IKeyBinding) focusedBinding).amecs$getKeyModifiers();
+				keyModifiers.set(KeyModifier.fromKey(((IKeyBinding) focusedBinding).amecs$getBoundKey()), true);
+			}
+			// This is a bit hacky, but the easiest way out
+			// If the selected binding != null, the mouse x and y will always be ignored - so no need to convert them
+			// The key code that InputUtil.MOUSE.createFromCode chooses is always one bigger than the input
+			client.currentScreen.mouseClicked(-1, -1, primaryKeyCode.getCode());
+			// if we do we cancel the method because we do not want the current screen to get the scroll event
+			callbackInfo.cancel();
+			return true;
+		}
+		return false;
 	}
 }

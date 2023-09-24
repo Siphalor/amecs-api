@@ -16,21 +16,25 @@
 
 package de.siphalor.amecs.impl.mixin;
 
-import java.util.List;
-import java.util.Set;
-
+import it.unimi.dsi.fastutil.ints.IntAVLTreeSet;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.MappingResolver;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.MappingResolver;
+import java.util.List;
+import java.util.Set;
 
 @Environment(EnvType.CLIENT)
 public class AmecsAPIMixinConfig implements IMixinConfigPlugin {
@@ -98,8 +102,21 @@ public class AmecsAPIMixinConfig implements IMixinConfigPlugin {
 	// The purpose of this is to capture the return value of the currentScreen.mouseScrolled call.
 	// Other mods also require this so this would lead to @Redirect conflicts when done via mixins.
 	private class OnMouseScrollTransformer extends GeneratorAdapter {
+		private final IntSet knownLocals = new IntAVLTreeSet();
+		private final IntList doubleLocals = new IntArrayList();
+
 		protected OnMouseScrollTransformer(MethodVisitor methodVisitor, int access, String name, String descriptor) {
 			super(Opcodes.ASM9, methodVisitor, access, name, descriptor);
+		}
+
+		@Override
+		public void storeLocal(int local, Type type) {
+			if (knownLocals.add(local)) {
+				if (type == Type.DOUBLE_TYPE) {
+					doubleLocals.add(local);
+				}
+			}
+			super.storeLocal(local, type);
 		}
 
 		@Override
@@ -107,9 +124,15 @@ public class AmecsAPIMixinConfig implements IMixinConfigPlugin {
 			if (opcode == Opcodes.INVOKEVIRTUAL && screenClassRemappedType.equals(owner) && screenMouseScrolledRemappedType.equals(name)) {
 				super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
 				super.loadThis();
-				super.dupX1();
-				super.pop();
-				super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, mouseClassRemapped.replace('.', '/'), "amecs$onMouseScrolledScreen", "(Z)Z", false);
+				super.swap();
+
+				int scrollAmountXLocal = doubleLocals.getInt(1);
+				int scrollAmountYLocal = doubleLocals.getInt(2);
+
+				super.loadLocal(scrollAmountXLocal, Type.DOUBLE_TYPE);
+				super.loadLocal(scrollAmountYLocal, Type.DOUBLE_TYPE);
+
+				super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, mouseClassRemapped.replace('.', '/'), "amecs$onMouseScrolledScreen", "(ZDD)Z", false);
 				return;
 			}
 			super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);

@@ -23,7 +23,6 @@ import java.util.Map;
 import de.siphalor.amecs.impl.KeyBindingManager;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
 import lombok.CustomLog;
-import lombok.Getter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.option.KeyBinding;
@@ -38,33 +37,79 @@ import net.minecraft.client.util.InputUtil;
 public class KeyBindingUtils {
 	public static final int MOUSE_SCROLL_UP = 512;
 	public static final int MOUSE_SCROLL_DOWN = 513;
+	public static final int MOUSE_SCROLL_LEFT = 514;
+	public static final int MOUSE_SCROLL_RIGHT = 515;
 
 	/**
 	 * The last (y directional) scroll delta
 	 */
-	@Getter
-	private static double lastScrollAmount = 0;
+	@Deprecated
+	private static double lastScrollAmountY = 0;
 	private static Map<String, KeyBinding> idToKeyBindingMap;
 
-	private KeyBindingUtils() {}
+	private KeyBindingUtils() {
+	}
+
+	/**
+	 * Gets the last (y directional) scroll amount.
+	 *
+	 * @return the last (y directional) scroll amount
+	 * @deprecated Just exists for legacy support.
+	 */
+	@Deprecated
+	public static double getLastScrollAmount() {
+		return lastScrollAmountY;
+	}
 
 	/**
 	 * Sets the last (y directional) scroll amount. <b>For internal use only.</b>
 	 *
-	 * @param lastScrollAmount the amount
+	 * @param lastScrollAmountY the amount
+	 * @deprecated Just exists for legacy support.
 	 */
-	public static void setLastScrollAmount(double lastScrollAmount) {
-		KeyBindingUtils.lastScrollAmount = lastScrollAmount;
+	@Deprecated
+	public static void setLastScrollAmount(double lastScrollAmountY) {
+		KeyBindingUtils.lastScrollAmountY = lastScrollAmountY;
 	}
 
 	/**
-	 * Gets the key object for the scroll direction
+	 * Gets the key object for the vertical scroll direction
+	 *
+	 * @param deltaY the vertical (y) scroll amount {@link #getLastScrollAmount}
+	 * @return the key object
+	 * @see #getKeyFromVerticalScroll(double)
+	 * @see #getKeyFromHorizontalScroll(double)
+	 * @deprecated Just exists for legacy support. Use {@link #getKeyFromVerticalScroll(double)} instead.
+	 */
+	@Deprecated
+	public static InputUtil.Key getKeyFromScroll(double deltaY) {
+		return InputUtil.Type.MOUSE.createFromCode(deltaY > 0 ? KeyBindingUtils.MOUSE_SCROLL_UP : KeyBindingUtils.MOUSE_SCROLL_DOWN);
+	}
+
+	/**
+	 * Gets the key object for the vertical scroll direction
 	 *
 	 * @param deltaY the vertical (y) scroll amount {@link #getLastScrollAmount}
 	 * @return the key object
 	 */
-	public static InputUtil.Key getKeyFromScroll(double deltaY) {
+	public static InputUtil.Key getKeyFromVerticalScroll(double deltaY) {
+		if (deltaY == 0D) {
+			return null;
+		}
 		return InputUtil.Type.MOUSE.createFromCode(deltaY > 0 ? KeyBindingUtils.MOUSE_SCROLL_UP : KeyBindingUtils.MOUSE_SCROLL_DOWN);
+	}
+
+	/**
+	 * Gets the key object for the horizontal scroll direction
+	 *
+	 * @param deltaX the horizontal (x) scroll amount {@link #getLastScrollAmount}
+	 * @return the key object
+	 */
+	public static InputUtil.Key getKeyFromHorizontalScroll(double deltaX) {
+		if (deltaX == 0D) {
+			return null;
+		}
+		return InputUtil.Type.MOUSE.createFromCode(deltaX > 0 ? KeyBindingUtils.MOUSE_SCROLL_RIGHT : KeyBindingUtils.MOUSE_SCROLL_LEFT);
 	}
 
 	/**
@@ -110,9 +155,9 @@ public class KeyBindingUtils {
 	 * <br>
 	 * for more details {@link #unregisterKeyBinding(KeyBinding)}
 	 *
-	 * @see #unregisterKeyBinding(KeyBinding)
 	 * @param id the translation key
 	 * @return whether the keyBinding was removed. It is not removed if it was not contained
+	 * @see #unregisterKeyBinding(KeyBinding)
 	 */
 	public static boolean unregisterKeyBinding(String id) {
 		KeyBinding keyBinding = getIdToKeyBindingMap().remove(id);
@@ -136,6 +181,7 @@ public class KeyBindingUtils {
 
 	/**
 	 * Gets the key modifiers that are bound to the given key binding
+	 *
 	 * @param keyBinding the key binding
 	 * @return the key modifiers
 	 */
@@ -146,6 +192,7 @@ public class KeyBindingUtils {
 	/**
 	 * Gets the default modifiers of the given key binding.
 	 * The returned value <b>must not be modified!</b>
+	 *
 	 * @param keyBinding the key binding
 	 * @return a reference to the default modifiers
 	 */
