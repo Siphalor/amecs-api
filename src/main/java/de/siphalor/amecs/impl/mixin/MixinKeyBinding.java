@@ -123,14 +123,14 @@ public abstract class MixinKeyBinding implements IKeyBinding {
 
 	@Inject(method = "matchesKey", at = @At("RETURN"), cancellable = true)
 	public void matchesKey(int keyCode, int scanCode, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-		if (!keyModifiers.isUnset() && !keyModifiers.isPressed()) {
+		if (!keyModifiers.isUnset() && !keyModifiers.equals(KeyModifiers.getCurrentlyPressed())) {
 			callbackInfoReturnable.setReturnValue(false);
 		}
 	}
 
 	@Inject(method = "matchesMouse", at = @At("RETURN"), cancellable = true)
 	public void matchesMouse(int mouse, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-		if (!keyModifiers.isUnset() && !keyModifiers.isPressed()) {
+		if (!keyModifiers.isUnset() && !keyModifiers.equals(KeyModifiers.getCurrentlyPressed())) {
 			callbackInfoReturnable.setReturnValue(false);
 		}
 	}
