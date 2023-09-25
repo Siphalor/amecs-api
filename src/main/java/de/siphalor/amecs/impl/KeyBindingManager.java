@@ -18,6 +18,7 @@ package de.siphalor.amecs.impl;
 
 import de.siphalor.amecs.api.KeyBindingUtils;
 import de.siphalor.amecs.api.KeyModifier;
+import de.siphalor.amecs.api.KeyModifiers;
 import de.siphalor.amecs.api.PriorityKeyBinding;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
@@ -100,11 +101,15 @@ public class KeyBindingManager {
 			return Stream.empty();
 		// If there are two key bindings, alt + y and shift + alt + y, and you press shift + alt + y, both will be triggered.
 		// This is intentional.
-		Stream<KeyBinding> result = keyBindingList.stream().filter(keyBinding -> ((IKeyBinding) keyBinding).amecs$getKeyModifiers().isPressed());
+		Stream<KeyBinding> result = keyBindingList.stream().filter(KeyBindingManager::areExactModifiersPressed);
 		List<KeyBinding> keyBindings = result.collect(Collectors.toList());
 		if (keyBindings.isEmpty())
 			return keyBindingList.stream().filter(keyBinding -> ((IKeyBinding) keyBinding).amecs$getKeyModifiers().isUnset());
 		return keyBindings.stream();
+	}
+
+	private static boolean areExactModifiersPressed(KeyBinding keyBinding) {
+		return KeyBindingUtils.getBoundModifiers(keyBinding).equals(AmecsAPI.CURRENT_MODIFIERS);
 	}
 
 	public static void onKeyPressed(InputUtil.KeyCode keyCode) {
@@ -186,14 +191,22 @@ public class KeyBindingManager {
 	}
 
 	public static void setKeyPressed(InputUtil.KeyCode keyCode, boolean pressed) {
-		AmecsAPI.CURRENT_MODIFIERS.set(KeyModifier.fromKeyCode(keyCode.getKeyCode()), pressed);
+		KeyModifier modifier = KeyModifier.fromKeyCode(keyCode.getKeyCode());
+		AmecsAPI.CURRENT_MODIFIERS.set(modifier, pressed);
 
 		// Update keybindings with matching modifiers and the same keycode
 		forEachKeyBindingWithKey(keyCode, keyBinding -> setKeyBindingPressed(keyBinding, pressed));
 
-		// Handle the case, that a modifier has been released
+		if (modifier != null && !pressed) {
+			handleReleasedModifier();
+		}
+	}
+
+	private static void handleReleasedModifier() {
+		// Handle the case that a modifier has been released
 		pressedKeyBindings.removeIf(pressedKeyBinding -> {
-			if (!KeyBindingUtils.getBoundModifiers(pressedKeyBinding).isPressed()) {
+			KeyModifiers boundModifiers = KeyBindingUtils.getBoundModifiers(pressedKeyBinding);
+			if (!AmecsAPI.CURRENT_MODIFIERS.contains(boundModifiers)) {
 				((IKeyBinding) pressedKeyBinding).amecs$setPressed(false);
 				return true;
 			}

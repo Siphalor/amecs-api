@@ -1,7 +1,9 @@
 {
 	"key.amecsapi.mouse.scroll.up": "Scroll Up",
 	"key.amecsapi.mouse.scroll.down": "Scroll Down",
-	
+	"key.amecsapi.mouse.scroll.left": "Scroll Left",
+	"key.amecsapi.mouse.scroll.right": "Scroll Right",
+
 	"amecsapi.modifier.alt": "Alt",
 	"amecsapi.modifier.alt.short": "Alt",
 	"amecsapi.modifier.alt.tiny": "A",

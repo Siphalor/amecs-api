@@ -16,18 +16,16 @@
 
 package de.siphalor.amecs.api;
 
-import java.util.Arrays;
-import java.util.BitSet;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.jetbrains.annotations.ApiStatus;
-
 import de.siphalor.amecs.impl.AmecsAPI;
 import de.siphalor.amecs.impl.duck.IKeyBinding;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.ApiStatus;
+
+import java.util.Arrays;
 
 /**
  * Defines modifiers for a key binding
@@ -61,6 +59,10 @@ public class KeyModifiers {
 		}
 	}
 
+	public static KeyModifiers getCurrentlyPressed() {
+		return AmecsAPI.CURRENT_MODIFIERS;
+	}
+
 	// using a boolean array here because it is faster and needs less space
 	private final boolean[] value;
 
@@ -74,10 +76,9 @@ public class KeyModifiers {
 	/**
 	 * FOR INTERNAL USE ONLY
 	 * <p>
-	 * Constructs a new modifier object by a raw {@link BitSet}
+	 * Constructs a new modifier object by a raw boolean array
 	 *
-	 * @param value
-	 *        the raw value with flags set
+	 * @param value the raw value with flags set
 	 */
 	@ApiStatus.Internal
 	public KeyModifiers(boolean[] value) {
@@ -90,9 +91,9 @@ public class KeyModifiers {
 	/**
 	 * Constructs a new modifier object by all modifier bits
 	 *
-	 * @param alt sets whether the alt flag should be set
+	 * @param alt     sets whether the alt flag should be set
 	 * @param control sets whether the control flag should be set
-	 * @param shift sets whether the shift flag should be set
+	 * @param shift   sets whether the shift flag should be set
 	 */
 	public KeyModifiers(boolean alt, boolean control, boolean shift) {
 		this();
@@ -105,9 +106,26 @@ public class KeyModifiers {
 	 * Compares this object with the currently pressed keys
 	 *
 	 * @return whether the modifiers match in the current context
+	 * @deprecated always performs an exact check against {@link #getCurrentlyPressed()}.
+	 * Use {@link AmecsAPI#CURRENT_MODIFIERS} in combination with {@link #contains(KeyModifiers)} or {@link #equals(KeyModifiers)} instead.
 	 */
+	@Deprecated
 	public boolean isPressed() {
 		return equals(AmecsAPI.CURRENT_MODIFIERS);
+	}
+
+	/**
+	 * Returns whether the given modifiers are also set in this object.
+	 * @param other the modifiers to check
+	 * @return whether the given modifiers are also set in this object
+	 */
+	public boolean contains(KeyModifiers other) {
+		for (int i = 0; i < value.length; i++) {
+			if (other.value[i] && !this.value[i]) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -245,6 +263,14 @@ public class KeyModifiers {
 		set(KeyModifier.fromKey(key), false);
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof KeyModifiers) {
+			return equals((KeyModifiers) obj);
+		}
+		return false;
+	}
+
 	/**
 	 * Returns whether this object equals another one
 	 *
@@ -262,6 +288,7 @@ public class KeyModifiers {
 
 	// new format even if it needs more characters because it is more user friendly (and simpler to parse). Not everyone knows about bit masks
 	// it could be discussed whether this new is really "better" but i leave it for now. It is backward compatible so nothing breaks
+
 	/**
 	 * FOR INTERNAL USE ONLY
 	 *
