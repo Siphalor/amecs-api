@@ -111,12 +111,22 @@ public class AmecsAPIMixinConfig implements IMixinConfigPlugin {
 
 		@Override
 		public void storeLocal(int local, Type type) {
+			onLocalVariable(local, type == Type.DOUBLE_TYPE);
+			super.storeLocal(local, type);
+		}
+
+		@Override
+		public void visitVarInsn(int opcode, int varIndex) {
+			onLocalVariable(varIndex, opcode == Opcodes.DSTORE);
+			super.visitVarInsn(opcode, varIndex);
+		}
+
+		private void onLocalVariable(int local, boolean isDouble) {
 			if (knownLocals.add(local)) {
-				if (type == Type.DOUBLE_TYPE) {
+				if (isDouble) {
 					doubleLocals.add(local);
 				}
 			}
-			super.storeLocal(local, type);
 		}
 
 		@Override
