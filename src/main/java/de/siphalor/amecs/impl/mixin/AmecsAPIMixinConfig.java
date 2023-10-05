@@ -20,6 +20,7 @@ import it.unimi.dsi.fastutil.ints.IntAVLTreeSet;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import lombok.CustomLog;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
@@ -29,6 +30,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -37,6 +39,7 @@ import java.util.List;
 import java.util.Set;
 
 @Environment(EnvType.CLIENT)
+@CustomLog
 public class AmecsAPIMixinConfig implements IMixinConfigPlugin {
 	private final String MOUSE_CLASS_INTERMEDIARY = "net.minecraft.class_312";
 	private final String SCREEN_CLASS_INTERMEDIARY = "net.minecraft.class_437";
@@ -78,25 +81,26 @@ public class AmecsAPIMixinConfig implements IMixinConfigPlugin {
 
 	@Override
 	public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-
-	}
-
-	@Override
-	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
 		if (targetClassName.equals(mouseClassRemapped)) {
 			String onMouseScrollRemapped = mappingResolver.mapMethodName("intermediary", MOUSE_CLASS_INTERMEDIARY, "method_1598", "(JDD)V");
 
 			for (MethodNode method : targetClass.methods) {
 				if (onMouseScrollRemapped.equals(method.name)) {
 					targetClass.methods.remove(method);
+
 					method.accept(new OnMouseScrollTransformer(
 							targetClass.visitMethod(method.access, method.name, method.desc, method.signature, method.exceptions.toArray(new String[0])),
-							method.access, method.name, method.desc
+							method
 					));
 					break;
 				}
 			}
 		}
+	}
+
+	@Override
+	public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+
 	}
 
 	// The purpose of this is to capture the return value of the currentScreen.mouseScrolled call.
@@ -105,8 +109,8 @@ public class AmecsAPIMixinConfig implements IMixinConfigPlugin {
 		private final IntSet knownLocals = new IntAVLTreeSet();
 		private final IntList doubleLocals = new IntArrayList();
 
-		protected OnMouseScrollTransformer(MethodVisitor methodVisitor, int access, String name, String descriptor) {
-			super(Opcodes.ASM9, methodVisitor, access, name, descriptor);
+		protected OnMouseScrollTransformer(MethodVisitor methodVisitor, MethodNode method) {
+			super(Opcodes.ASM9, methodVisitor, method.access, method.name, method.desc);
 		}
 
 		@Override
