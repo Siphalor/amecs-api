@@ -42,6 +42,8 @@ dependencies {
 	compileOnly(annotationProcessor("org.projectlombok:lombok:$lombok_version"))
 	testCompileOnly(testAnnotationProcessor("org.projectlombok:lombok:$lombok_version"))
 
+	include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:$mixinextras_version")))
+
 	//modImplementation("de.siphalor:nmuk-${project.minecraft_major_version}:1.0.1+mc1.19.3") {
 	//	exclude module: "amecsapi-${project.minecraft_major_version}"
 	//}

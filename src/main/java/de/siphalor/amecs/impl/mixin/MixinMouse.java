@@ -16,17 +16,8 @@
 
 package de.siphalor.amecs.impl.mixin;
 
-import org.jetbrains.annotations.NotNull;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Surrogate;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import de.siphalor.amecs.api.KeyBindingUtils;
 import de.siphalor.amecs.api.KeyModifier;
 import de.siphalor.amecs.api.KeyModifiers;
@@ -38,9 +29,19 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.KeybindsScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import org.jetbrains.annotations.NotNull;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 // TODO: Fix the priority when Mixin 0.8 is a thing and try again (-> MaLiLib causes incompatibilities)
 @Environment(EnvType.CLIENT)
@@ -97,6 +98,12 @@ public class MixinMouse implements IMouse {
 		if (AmecsAPI.TRIGGER_KEYBINDING_ON_SCROLL) {
 			onScrollReceived(scrollAmountX, scrollAmountY);
 		}
+	}
+
+	@WrapOperation(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseScrolled(DDDD)Z"))
+	private boolean onMouseScrolledScreen(Screen screen, double mouseX, double mouseY, double xScrollAmount, double yScrollAmount, Operation<Boolean> original) {
+		Boolean handled = original.call(screen, mouseX, mouseY, xScrollAmount, yScrollAmount);
+		return amecs$onMouseScrolledScreen(handled, xScrollAmount, yScrollAmount);
 	}
 
 	// Invoked through manual injection by de.siphalor.amecs.impl.mixin.AmecsAPIMixinConfig

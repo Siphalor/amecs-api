@@ -2,7 +2,6 @@
 	"required": true,
 	"package": "de.siphalor.amecs.impl.mixin",
 	"compatibilityLevel": "JAVA_8",
-	"plugin": "de.siphalor.amecs.impl.mixin.AmecsAPIMixinConfig",
 	"mixins": [],
 	"client": [
 		"MixinKeybindsScreen",
