@@ -9,5 +9,7 @@
     "amecsapi.modifier.shift.short": "Shft",
     "amecsapi.modifier.shift.tiny": "S",
     "key.amecsapi.mouse.scroll.up": "Rolar para cima",
-    "key.amecsapi.mouse.scroll.down": "Rolar para baixo"
+    "key.amecsapi.mouse.scroll.down": "Rolar para baixo",
+    "key.amecsapi.mouse.scroll.left": "Rolar para a esquerda",
+    "key.amecsapi.mouse.scroll.right": "Rolar para a direita"
 }
