@@ -1,3 +1,6 @@
+> [!WARNING]
+> This project has been merged into the [main Amecs repository](https://github.com/Siphalor/amecs).
+
 <div align="center">
 <img alt="Logo" src="src/main/resources/assets/amecsapi/icon.png" />
 
